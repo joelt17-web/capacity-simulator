@@ -20,77 +20,77 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
-body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font-size:13px;line-height:1.5}
-.topbar{display:flex;align-items:center;gap:14px;padding:0 20px;height:52px;background:var(--tp-dark-slate);position:sticky;top:0;z-index:100;border-bottom:2px solid var(--tp-pink)}
+body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font-size:14px;line-height:1.5}
+.topbar{display:flex;align-items:center;gap:14px;padding:0 20px;height:56px;background:var(--tp-dark-slate);position:sticky;top:0;z-index:100;border-bottom:2px solid var(--tp-pink)}
 .logo{display:flex;align-items:center;gap:10px}
-.logo-text{font-size:13px;font-weight:500;color:rgba(255,255,255,0.9);letter-spacing:.3px;white-space:nowrap}
+.logo-text{font-size:16px;font-weight:600;color:#ffffff;letter-spacing:.2px;white-space:nowrap}
 .logo-text span{color:var(--tp-pink)}
 .tabs{display:flex;gap:1px;margin-left:4px}
-.tab{padding:6px 16px;border:none;background:transparent;cursor:pointer;font-size:12px;font-family:var(--font);font-weight:400;color:rgba(255,255,255,0.6);border-radius:4px;transition:all .15s;white-space:nowrap}
+.tab{padding:7px 18px;border:none;background:transparent;cursor:pointer;font-size:13px;font-family:var(--font);font-weight:400;color:rgba(255,255,255,0.6);border-radius:4px;transition:all .15s;white-space:nowrap}
 .tab:hover{color:rgba(255,255,255,0.9);background:rgba(255,255,255,0.08)}
 .tab.on{color:#fff;background:rgba(255,255,255,0.15);font-weight:500;border-bottom:2px solid var(--tp-pink)}
 .search-wrap{margin-left:auto;display:flex;gap:8px;align-items:center}
-.search-inp{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:6px;color:#fff;font-family:var(--font);font-size:12px;padding:5px 10px;width:150px;outline:none}
+.search-inp{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:6px;color:#fff;font-family:var(--font);font-size:13px;padding:6px 12px;width:165px;outline:none}
 .search-inp::placeholder{color:rgba(255,255,255,0.4)}
 .search-inp:focus{border-color:var(--tp-pink)}
-.tbtn{padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,0.25);background:transparent;cursor:pointer;font-size:12px;font-family:var(--font);color:rgba(255,255,255,0.85);transition:all .15s;white-space:nowrap}
+.tbtn{padding:7px 16px;border-radius:6px;border:1px solid rgba(255,255,255,0.25);background:transparent;cursor:pointer;font-size:13px;font-family:var(--font);color:rgba(255,255,255,0.85);transition:all .15s;white-space:nowrap}
 .tbtn:hover{background:rgba(255,255,255,0.15)}
 .tbtn.primary{background:var(--tp-pink);color:#fff;border-color:var(--tp-pink)}
 .tbtn.primary:hover{background:#d4006c;border-color:#d4006c}
-.btn{padding:5px 11px;border-radius:5px;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text-secondary);font-size:11px;font-family:var(--font)}
+.btn{padding:6px 12px;border-radius:5px;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text-secondary);font-size:12px;font-family:var(--font)}
 .btn:hover{background:var(--tp-pastel-sand)}
 .btn.del{background:var(--red-bg);color:var(--red);border-color:rgba(192,57,43,0.2)}
 .btn.del:hover{background:#fadbd8}
 .btn.save{background:var(--tp-dark-slate);color:#fff;border-color:var(--tp-dark-slate)}
 .btn.save:hover{background:#3a3b55}
-.page{display:none;padding:20px}
+.page{display:none;padding:22px}
 .page.active{display:block}
 .sec-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px}
-.sec-head h2{font-size:15px;font-weight:600;color:var(--tp-dark-slate)}
-.sec-head p{font-size:12px;color:var(--text-secondary);margin-top:2px}
+.sec-head h2{font-size:17px;font-weight:600;color:var(--tp-dark-slate)}
+.sec-head p{font-size:13px;color:var(--text-secondary);margin-top:2px}
 /* KPIs */
 .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
 .kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;position:relative;overflow:hidden}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--tp-dark-slate)}
 .kpi.pink::before{background:var(--tp-pink)}
 .kpi.green::before{background:var(--green)}
-.kpi .lbl{font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
-.kpi .val{font-size:24px;font-weight:600;color:var(--tp-dark-slate);line-height:1}
-.kpi .sub{font-size:11px;color:var(--text-secondary);margin-top:4px}
+.kpi .lbl{font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.kpi .val{font-size:28px;font-weight:600;color:var(--tp-dark-slate);line-height:1}
+.kpi .sub{font-size:12px;color:var(--text-secondary);margin-top:4px}
 .bar{height:5px;background:var(--tp-pastel-gray);border-radius:3px;overflow:hidden;margin-top:8px}
 .bar-f{height:100%;border-radius:3px;transition:width .3s}
 /* Building cards */
 .bld-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .bld-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
-.bld-name{font-size:13px;font-weight:600;color:var(--tp-dark-slate);margin-bottom:2px}
-.bld-cap{font-size:11px;color:var(--text-secondary);margin-bottom:7px}
+.bld-name{font-size:14px;font-weight:600;color:var(--tp-dark-slate);margin-bottom:2px}
+.bld-cap{font-size:12px;color:var(--text-secondary);margin-bottom:7px}
 /* Alert tables */
 .alert-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .abox{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
 .abox-head{padding:11px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
 .abox-head .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.abox-head h3{font-size:13px;font-weight:600;color:var(--tp-dark-slate)}
+.abox-head h3{font-size:14px;font-weight:600;color:var(--tp-dark-slate)}
 .abox-head .cnt{margin-left:auto;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px}
-.arow{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);font-size:12px}
+.arow{display:flex;align-items:center;gap:8px;padding:9px 16px;border-bottom:1px solid var(--border);font-size:13px}
 .arow:last-child{border-bottom:none}
-.apid{font-weight:600;color:var(--tp-dark-slate);min-width:115px;font-size:11px;font-family:monospace}
+.apid{font-weight:600;color:var(--tp-dark-slate);min-width:120px;font-size:12px;font-family:monospace}
 .aval{margin-left:auto;font-weight:600}
 .aempty{padding:20px 16px;font-size:12px;color:var(--text-secondary);text-align:center}
 /* Table */
 .tw{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px}
 .tw-s{overflow-x:auto;max-height:560px;overflow-y:auto}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{text-align:left;padding:8px 10px;font-size:10px;font-weight:600;color:var(--text-secondary);background:var(--tp-pastel-sand);border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;z-index:2}
-td{padding:6px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:9px 11px;font-size:11px;font-weight:600;color:var(--text-secondary);background:var(--tp-pastel-sand);border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;z-index:2}
+td{padding:7px 11px;border-bottom:1px solid var(--border);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(75,76,106,0.03)}
 tr.ed td{background:rgba(255,0,130,0.04)}
-tfoot td{font-weight:600;background:var(--tp-pastel-sand);font-size:11px;position:sticky;bottom:0;border-top:1px solid var(--border);color:var(--tp-dark-slate);padding:7px 10px}
-.ec{cursor:pointer;padding:3px 6px;border-radius:4px;display:inline-block;min-width:34px;font-family:monospace;transition:background .1s}
+tfoot td{font-weight:600;background:var(--tp-pastel-sand);font-size:12px;position:sticky;bottom:0;border-top:1px solid var(--border);color:var(--tp-dark-slate);padding:7px 10px}
+.ec{cursor:pointer;padding:3px 7px;border-radius:4px;display:inline-block;min-width:38px;font-family:monospace;transition:background .1s;font-size:13px}
 .ec:hover{background:var(--primary-soft)}
 .ec.z{color:var(--text-tertiary)}
-.ei{width:65px;font-size:12px;border:1.5px solid var(--tp-pink);border-radius:4px;padding:2px 5px;background:var(--surface);color:var(--text-primary);font-family:monospace;outline:none}
-.badge{display:inline-flex;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:500}
+.ei{width:68px;font-size:13px;border:1.5px solid var(--tp-pink);border-radius:4px;padding:3px 5px;background:var(--surface);color:var(--text-primary);font-family:monospace;outline:none}
+.badge{display:inline-flex;padding:3px 9px;border-radius:10px;font-size:12px;font-weight:500}
 .ok{background:var(--green-bg);color:var(--green)}
 .warn{background:var(--amber-bg);color:var(--amber)}
 .bad{background:var(--red-bg);color:var(--red)}
@@ -107,8 +107,8 @@ tfoot td{font-weight:600;background:var(--tp-pastel-sand);font-size:11px;positio
 .bld-krow{display:flex;border-bottom:1px solid var(--border)}
 .bld-kc{flex:1;padding:13px 16px;border-right:1px solid var(--border)}
 .bld-kc:last-child{border-right:none}
-.bld-kl{font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
-.bld-kv{font-size:19px;font-weight:600}
+.bld-kl{font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.bld-kv{font-size:22px;font-weight:600}
 /* modal */
 .mbg{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:flex-start;justify-content:center;padding-top:60px;z-index:200}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;width:500px;max-width:96%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.12)}
@@ -125,7 +125,7 @@ tfoot td{font-weight:600;background:var(--tp-pastel-sand);font-size:11px;positio
 .g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
 .mfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
 .msec{font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px}
-.hint{padding:4px 0 12px;font-size:11px;color:var(--text-tertiary)}
+.hint{padding:4px 0 12px;font-size:12px;color:var(--text-tertiary)}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-thumb{background:var(--tp-pastel-slate);border-radius:3px}
 </style>
@@ -133,14 +133,8 @@ tfoot td{font-weight:600;background:var(--tp-pastel-sand);font-size:11px;positio
 <body>
 <div class="topbar">
   <div class="logo">
-    <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-      <rect x="0" y="0" width="7" height="14" fill="white"/>
-      <rect x="0" y="15" width="7" height="7" fill="white"/>
-      <rect x="9" y="0" width="7" height="7" fill="rgba(255,255,255,0.4)"/>
-      <circle cx="19" cy="9" r="7" fill="white"/>
-      <rect x="9" y="10" width="7" height="11" fill="rgba(255,255,255,0.4)"/>
-    </svg>
-    <span class="logo-text">TP <span>Capacity Simulator</span></span>
+    
+    <span class="logo-text">TP Capacity Management</span>
   </div>
   <div class="tabs" id="tabs">
     <button class="tab" onclick="showTab('dashboard')">Dashboard</button>
@@ -245,8 +239,8 @@ function renderDashboard(){
       <div class="bld-name">${b}</div><div class="bld-cap">Cap: ${c.toLocaleString()}</div>
       <div class="bar"><div class="bar-f" style="width:${Math.min(p2,100)}%;background:${cc(p2)}"></div></div>
       <div style="display:flex;justify-content:space-between;margin-top:4px">
-        <div><div style="font-size:17px;font-weight:600;color:${cc(p2)}">${p2}%</div><div style="font-size:11px;color:var(--text-secondary)">${u} WKS usados</div></div>
-        <div style="text-align:right"><div style="font-size:14px;font-weight:600;color:${fl<0?'var(--red)':fl<30?'var(--amber)':'var(--green)'}">${fl}</div><div style="font-size:11px;color:var(--text-secondary)">livres</div></div>
+        <div><div style="font-size:20px;font-weight:600;color:${cc(p2)}">${p2}%</div><div style="font-size:12px;color:var(--text-secondary)">${u} WKS usados</div></div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:600;color:${fl<0?'var(--red)':fl<30?'var(--amber)':'var(--green)'}">${fl}</div><div style="font-size:12px;color:var(--text-secondary)">livres</div></div>
       </div>
     </div>`;
   }).join('');
@@ -297,7 +291,7 @@ function renderProjects(){
     <tbody>${rows.map(p=>{
       const t=tot(p),uH=t?pct(p.hc,t):null,uP=t?pct(p.peak_agents,t):null;
       return`<tr class="${editRow===p.id?'ed':''}">
-        <td style="position:sticky;left:0;background:var(--surface);z-index:1;border-right:1px solid var(--border)"><span style="font-family:monospace;font-weight:600;font-size:11px;color:var(--tp-dark-slate)">${p.id}</span></td>
+        <td style="position:sticky;left:0;background:var(--surface);z-index:1;border-right:1px solid var(--border)"><span style="font-family:monospace;font-weight:600;font-size:12px;color:var(--tp-dark-slate)">${p.id}</span></td>
         <td>${ec(p,'hc',p.hc)}</td><td>${ec(p,'peak_agents',p.peak_agents)}</td><td>${ec(p,'peak_staff',p.peak_staff)}</td>
         ${BLD.map(b=>`<td>${sc(p,b)}</td>`).join('')}
         <td><span style="font-family:monospace;font-weight:600">${t||'—'}</span></td>
@@ -320,8 +314,8 @@ function renderBuildings(){
   document.getElementById('bld-sb-list').innerHTML=BLD.map(b=>{
     const u=bUsed(b),p2=pct(u,CAPS[b]),n=DATA.filter(x=>x.seats[b]>0).length;
     return`<div class="bld-item${activeBld===b?' act':''}" onclick="activeBld='${b}';renderBuildings()">
-      <div style="font-size:13px;font-weight:600;color:var(--tp-dark-slate);margin-bottom:2px">${b}</div>
-      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:5px">${n} projetos · cap ${CAPS[b]}</div>
+      <div style="font-size:14px;font-weight:600;color:var(--tp-dark-slate);margin-bottom:2px">${b}</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:5px">${n} projetos · cap ${CAPS[b]}</div>
       <div class="bar"><div class="bar-f" style="width:${Math.min(p2,100)}%;background:${cc(p2)}"></div></div>
       <div style="display:flex;justify-content:space-between;margin-top:2px">
         <span style="font-size:11px;color:var(--text-secondary)">${u} usados</span>
@@ -345,7 +339,7 @@ function renderBuildings(){
   };
 
   document.getElementById('bld-det').innerHTML=`
-    <div class="bld-det-h"><div style="font-size:18px;font-weight:600;color:var(--tp-dark-slate)">${b}</div><div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${projs.length} projetos</div></div>
+    <div class="bld-det-h"><div style="font-size:20px;font-weight:600;color:var(--tp-dark-slate)">${b}</div><div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${projs.length} projetos</div></div>
     <div class="bld-krow">
       <div class="bld-kc"><div class="bld-kl">Capacidade</div><div class="bld-kv" style="color:var(--tp-dark-slate)">${cap}</div></div>
       <div class="bld-kc"><div class="bld-kl">WKS usados</div><div class="bld-kv" style="color:${cc(p2)}">${u} <span style="font-size:13px">(${p2}%)</span></div></div>
@@ -367,7 +361,7 @@ function renderBuildings(){
         projs.map(proj=>{
           const wks=proj.seats[b]||0,frl=wks-proj.peak_agents,up=wks?pct(proj.peak_agents,wks):0;
           return`<tr class="${editRow===proj.id?'ed':''}">
-            <td style="position:sticky;left:0;background:var(--surface);z-index:1;border-right:1px solid var(--border)"><span style="font-family:monospace;font-weight:600;font-size:11px;color:var(--tp-dark-slate)">${proj.id}</span></td>
+            <td style="position:sticky;left:0;background:var(--surface);z-index:1;border-right:1px solid var(--border)"><span style="font-family:monospace;font-weight:600;font-size:12px;color:var(--tp-dark-slate)">${proj.id}</span></td>
             <td>${ecB(proj,'hc',proj.hc)}</td>
             <td>${ecB(proj,'peak_agents',proj.peak_agents)}</td>
             <td>${ecB(proj,'peak_staff',proj.peak_staff)}</td>
@@ -403,14 +397,14 @@ function renderSimulator(){
   const hw=`<div style="display:flex;background:var(--tp-pastel-sand);border-radius:10px 10px 0 0;border:1px solid var(--border);border-bottom:none">
     <div style="width:148px;min-width:148px;padding:8px 10px;border-right:1px solid var(--border);font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px">Projeto</div>
     <div style="width:55px;min-width:55px;padding:8px 6px;border-right:1px solid var(--border);font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px">Pico ag.</div>
-    ${BLD.map(b=>{const u=sBUsed(b),p2=pct(u,CAPS[b]);return`<div style="flex:1;min-width:88px;padding:5px 8px;border-right:1px solid var(--border)"><div style="font-size:11px;font-weight:600;color:var(--tp-dark-slate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b}</div><div class="bar"><div class="bar-f" style="width:${Math.min(p2,100)}%;background:${cc(p2)}"></div></div><div style="font-size:10px;color:${cc(p2)};font-weight:600">${u}/${CAPS[b]} · ${p2}%</div></div>`;}).join('')}
+    ${BLD.map(b=>{const u=sBUsed(b),p2=pct(u,CAPS[b]);return`<div style="flex:1;min-width:88px;padding:5px 8px;border-right:1px solid var(--border)"><div style="font-size:12px;font-weight:600;color:var(--tp-dark-slate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b}</div><div class="bar"><div class="bar-f" style="width:${Math.min(p2,100)}%;background:${cc(p2)}"></div></div><div style="font-size:10px;color:${cc(p2)};font-weight:600">${u}/${CAPS[b]} · ${p2}%</div></div>`;}).join('')}
     <div style="width:62px;min-width:62px;padding:8px 8px;font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px">Total</div>
   </div>`;
 
   const brows=rows.map(p=>{
     const st=BLD.reduce((s,b)=>s+gss(p.id,b),0);
     return`<div style="display:flex;border-left:1px solid var(--border);border-right:1px solid var(--border);border-bottom:1px solid var(--border)">
-      <div style="width:148px;min-width:148px;padding:5px 10px;border-right:1px solid var(--border);display:flex;align-items:center"><span style="font-family:monospace;font-weight:600;font-size:11px;color:var(--tp-dark-slate)">${p.id}</span></div>
+      <div style="width:148px;min-width:148px;padding:5px 10px;border-right:1px solid var(--border);display:flex;align-items:center"><span style="font-family:monospace;font-weight:600;font-size:12px;color:var(--tp-dark-slate)">${p.id}</span></div>
       <div style="width:55px;min-width:55px;padding:5px 6px;border-right:1px solid var(--border);font-size:12px;color:var(--text-secondary);display:flex;align-items:center">${p.peak_agents||'—'}</div>
       ${BLD.map(b=>{
         const v=gss(p.id,b),base=p.seats[b]||0,diff=v-base,isE=editRow===p.id&&editField==='sim_'+b;
