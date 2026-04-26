@@ -3,366 +3,500 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Capacity Simulator</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>TP Capacity Simulator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0f1117;
-  --bg2: #161922;
-  --bg3: #1e2230;
-  --border: #2a2f3e;
-  --border2: #353b4f;
-  --text: #e8eaf0;
-  --text2: #8b90a0;
-  --text3: #555b6e;
-  --accent: #4f8ef7;
-  --accent2: #2563d4;
-  --green: #22c97a;
-  --green-bg: rgba(34,201,122,0.1);
-  --amber: #f59e0b;
-  --amber-bg: rgba(245,158,11,0.1);
-  --red: #ef4444;
-  --red-bg: rgba(239,68,68,0.1);
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'IBM Plex Sans', sans-serif;
+  --tp-dark-slate:#4B4C6A;--tp-slate:#848dad;--tp-muted-violet:#706398;
+  --tp-pastel-violet:#e2dfe8;--tp-pastel-sand:#ece9e7;--tp-sand:#d4d2ca;
+  --tp-pastel-gray:#e6e6e5;--tp-pink:#ff0082;--tp-dark-gray:#414141;
+  --tp-gray:#676767;--tp-light-gray:#cccccc;--tp-pastel-slate:#c2c7cd;
+  --bg:#f5f4f2;--bg2:#fff;--border:#dddbd8;--border2:#c8c6c2;
+  --surface:#fff;--text-primary:#414141;--text-secondary:#676767;--text-tertiary:#cccccc;
+  --accent:#ff0082;--accent-soft:rgba(255,0,130,0.08);
+  --primary:#4B4C6A;--primary-soft:rgba(75,76,106,0.08);
+  --green:#1a8a5a;--green-bg:#e8f5ee;--amber:#b35c00;--amber-bg:#fef3e2;
+  --red:#c0392b;--red-bg:#fdecea;--font:'Inter',sans-serif;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 13px; min-height: 100vh; }
-
-/* TOPBAR */
-.topbar {
-  display: flex; align-items: center; gap: 12px; padding: 10px 16px;
-  border-bottom: 1px solid var(--border); background: var(--bg2);
-  position: sticky; top: 0; z-index: 100;
-}
-.logo { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--accent); letter-spacing: -0.3px; white-space: nowrap; }
-.logo span { color: var(--text2); }
-.tabs { display: flex; gap: 2px; background: var(--bg); border-radius: 8px; padding: 3px; flex-shrink: 0; }
-.tab { padding: 5px 14px; border-radius: 6px; border: none; background: transparent; cursor: pointer; font-size: 12px; font-family: var(--sans); color: var(--text2); transition: all .15s; }
-.tab.on { background: var(--bg3); color: var(--text); border: 1px solid var(--border2); }
-.tab:hover:not(.on) { color: var(--text); }
-.search-inp { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-family: var(--sans); font-size: 12px; padding: 5px 10px; width: 140px; outline: none; }
-.search-inp:focus { border-color: var(--accent); }
-.btn { padding: 5px 12px; border-radius: 7px; border: 1px solid var(--border2); background: transparent; cursor: pointer; font-size: 12px; font-family: var(--sans); color: var(--text); transition: all .15s; white-space: nowrap; }
-.btn:hover { background: var(--bg3); border-color: var(--border2); }
-.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-.btn.primary:hover { background: var(--accent2); }
-.btn.danger { background: var(--red-bg); color: var(--red); border-color: rgba(239,68,68,0.3); }
-.btn.danger:hover { background: rgba(239,68,68,0.2); }
-
-/* STRIP */
-.strip { display: grid; grid-template-columns: repeat(6,1fr); border-bottom: 1px solid var(--border); background: var(--bg2); }
-.sc { padding: 10px 14px; border-right: 1px solid var(--border); }
-.sc:last-child { border-right: none; }
-.sc .l { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 3px; }
-.sc .v { font-size: 18px; font-weight: 500; font-family: var(--mono); }
-.sc .s { font-size: 11px; color: var(--text2); margin-top: 2px; }
-
-/* TABLE */
-.tw { overflow: auto; border: 1px solid var(--border); border-radius: 10px; margin: 14px 14px 0; }
-.tw-inner { max-height: 540px; overflow: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-th { text-align: left; padding: 7px 8px; font-size: 10px; font-weight: 500; color: var(--text3); background: var(--bg2); border-bottom: 1px solid var(--border); white-space: nowrap; text-transform: uppercase; letter-spacing: .4px; position: sticky; top: 0; z-index: 2; }
-td { padding: 5px 7px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(255,255,255,0.02); }
-tr.editing td { background: rgba(79,142,247,0.04); }
-tfoot td { font-weight: 500; background: var(--bg2); padding: 7px 8px; font-size: 11px; position: sticky; bottom: 0; border-top: 1px solid var(--border); color: var(--text2); }
-
-/* EDITABLE CELL */
-.ecell { cursor: pointer; padding: 3px 5px; border-radius: 5px; display: inline-block; min-width: 36px; transition: background .1s; font-family: var(--mono); }
-.ecell:hover { background: var(--bg3); }
-.ecell.dim { color: var(--text3); }
-.ei { width: 100%; font-size: 12px; border: 1px solid var(--accent); border-radius: 5px; padding: 2px 5px; background: var(--bg); color: var(--text); font-family: var(--mono); min-width: 44px; outline: none; }
-
-/* BADGE */
-.badge { display: inline-flex; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 500; font-family: var(--mono); }
-.ok  { background: var(--green-bg); color: var(--green); }
-.warn{ background: var(--amber-bg); color: var(--amber); }
-.bad { background: var(--red-bg);   color: var(--red);   }
-.inf { background: rgba(79,142,247,0.12); color: var(--accent); }
-
-/* BAR */
-.bar { height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; margin: 3px 0; }
-.bf  { height: 100%; border-radius: 2px; transition: width .3s; }
-
-/* BUILDING CARDS */
-.bld-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; padding: 14px; }
-.bld-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
-.bld-name { font-family: var(--mono); font-size: 13px; font-weight: 500; margin-bottom: 2px; color: var(--text); }
-.bld-cap { font-size: 11px; color: var(--text3); margin-bottom: 8px; }
-.bld-proj { display: flex; justify-content: space-between; font-size: 11px; padding: 3px 0; border-top: 1px solid var(--border); }
-.bld-proj .pid { font-family: var(--mono); color: var(--text2); }
-
-/* SIMULATOR */
-.sim-grid-head { display: flex; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px 10px 0 0; }
-.sim-head-cell { flex: 1; min-width: 85px; padding: 6px 8px; border-right: 1px solid var(--border); }
-.sim-head-cell:last-child { border-right: none; }
-.sim-body { border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; overflow: hidden; }
-.sim-row { display: flex; border-bottom: 1px solid var(--border); }
-.sim-row:last-child { border-bottom: none; }
-.sim-cell { flex: 1; min-width: 85px; padding: 5px 8px; border-right: 1px solid var(--border); cursor: pointer; transition: background .1s; }
-.sim-cell:last-child { border-right: none; }
-.sim-cell:hover { background: rgba(79,142,247,0.05); }
-.sim-footer { display: flex; background: var(--bg2); border-top: 1px solid var(--border); }
-.sim-footer-cell { flex: 1; min-width: 85px; padding: 6px 8px; border-right: 1px solid var(--border); font-size: 11px; font-weight: 500; font-family: var(--mono); }
-.sim-footer-cell:last-child { border-right: none; }
-
-/* MODAL */
-.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: flex-start; justify-content: center; padding-top: 60px; z-index: 200; }
-.modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; padding: 20px; width: 500px; max-width: 96%; max-height: 85vh; overflow-y: auto; }
-.modal h3 { font-size: 14px; font-weight: 500; margin-bottom: 14px; font-family: var(--mono); color: var(--accent); }
-.fg { display: flex; flex-direction: column; gap: 4px; margin-bottom: 9px; }
-.fg label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; }
-.fg input { font-size: 13px; padding: 7px 9px; border: 1px solid var(--border2); border-radius: 7px; background: var(--bg); color: var(--text); font-family: var(--sans); outline: none; }
-.fg input:focus { border-color: var(--accent); }
-.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.g4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
-.hint { padding: 6px 14px 10px; font-size: 11px; color: var(--text3); }
-.sid { font-family: var(--mono); font-size: 11px; color: var(--text2); }
-
-/* SCROLLBAR */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text-primary);font-size:13px;line-height:1.5}
+.topbar{display:flex;align-items:center;gap:14px;padding:0 20px;height:52px;background:var(--tp-dark-slate);position:sticky;top:0;z-index:100;border-bottom:2px solid var(--tp-pink)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-text{font-size:13px;font-weight:500;color:rgba(255,255,255,0.9);letter-spacing:.3px;white-space:nowrap}
+.logo-text span{color:var(--tp-pink)}
+.tabs{display:flex;gap:1px;margin-left:4px}
+.tab{padding:6px 16px;border:none;background:transparent;cursor:pointer;font-size:12px;font-family:var(--font);font-weight:400;color:rgba(255,255,255,0.6);border-radius:4px;transition:all .15s;white-space:nowrap}
+.tab:hover{color:rgba(255,255,255,0.9);background:rgba(255,255,255,0.08)}
+.tab.on{color:#fff;background:rgba(255,255,255,0.15);font-weight:500;border-bottom:2px solid var(--tp-pink)}
+.search-wrap{margin-left:auto;display:flex;gap:8px;align-items:center}
+.search-inp{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:6px;color:#fff;font-family:var(--font);font-size:12px;padding:5px 10px;width:150px;outline:none}
+.search-inp::placeholder{color:rgba(255,255,255,0.4)}
+.search-inp:focus{border-color:var(--tp-pink)}
+.tbtn{padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,0.25);background:transparent;cursor:pointer;font-size:12px;font-family:var(--font);color:rgba(255,255,255,0.85);transition:all .15s;white-space:nowrap}
+.tbtn:hover{background:rgba(255,255,255,0.15)}
+.tbtn.primary{background:var(--tp-pink);color:#fff;border-color:var(--tp-pink)}
+.tbtn.primary:hover{background:#d4006c;border-color:#d4006c}
+.btn{padding:5px 11px;border-radius:5px;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text-secondary);font-size:11px;font-family:var(--font)}
+.btn:hover{background:var(--tp-pastel-sand)}
+.btn.del{background:var(--red-bg);color:var(--red);border-color:rgba(192,57,43,0.2)}
+.btn.del:hover{background:#fadbd8}
+.btn.save{background:var(--tp-dark-slate);color:#fff;border-color:var(--tp-dark-slate)}
+.btn.save:hover{background:#3a3b55}
+.page{display:none;padding:20px}
+.page.active{display:block}
+.sec-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px}
+.sec-head h2{font-size:15px;font-weight:600;color:var(--tp-dark-slate)}
+.sec-head p{font-size:12px;color:var(--text-secondary);margin-top:2px}
+/* KPIs */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--tp-dark-slate)}
+.kpi.pink::before{background:var(--tp-pink)}
+.kpi.green::before{background:var(--green)}
+.kpi .lbl{font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.kpi .val{font-size:24px;font-weight:600;color:var(--tp-dark-slate);line-height:1}
+.kpi .sub{font-size:11px;color:var(--text-secondary);margin-top:4px}
+.bar{height:5px;background:var(--tp-pastel-gray);border-radius:3px;overflow:hidden;margin-top:8px}
+.bar-f{height:100%;border-radius:3px;transition:width .3s}
+/* Building cards */
+.bld-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.bld-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
+.bld-name{font-size:13px;font-weight:600;color:var(--tp-dark-slate);margin-bottom:2px}
+.bld-cap{font-size:11px;color:var(--text-secondary);margin-bottom:7px}
+/* Alert tables */
+.alert-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.abox{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.abox-head{padding:11px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.abox-head .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.abox-head h3{font-size:13px;font-weight:600;color:var(--tp-dark-slate)}
+.abox-head .cnt{margin-left:auto;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px}
+.arow{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);font-size:12px}
+.arow:last-child{border-bottom:none}
+.apid{font-weight:600;color:var(--tp-dark-slate);min-width:115px;font-size:11px;font-family:monospace}
+.aval{margin-left:auto;font-weight:600}
+.aempty{padding:20px 16px;font-size:12px;color:var(--text-secondary);text-align:center}
+/* Table */
+.tw{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.tw-s{overflow-x:auto;max-height:560px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 10px;font-size:10px;font-weight:600;color:var(--text-secondary);background:var(--tp-pastel-sand);border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;z-index:2}
+td{padding:6px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(75,76,106,0.03)}
+tr.ed td{background:rgba(255,0,130,0.04)}
+tfoot td{font-weight:600;background:var(--tp-pastel-sand);font-size:11px;position:sticky;bottom:0;border-top:1px solid var(--border);color:var(--tp-dark-slate);padding:7px 10px}
+.ec{cursor:pointer;padding:3px 6px;border-radius:4px;display:inline-block;min-width:34px;font-family:monospace;transition:background .1s}
+.ec:hover{background:var(--primary-soft)}
+.ec.z{color:var(--text-tertiary)}
+.ei{width:65px;font-size:12px;border:1.5px solid var(--tp-pink);border-radius:4px;padding:2px 5px;background:var(--surface);color:var(--text-primary);font-family:monospace;outline:none}
+.badge{display:inline-flex;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:500}
+.ok{background:var(--green-bg);color:var(--green)}
+.warn{background:var(--amber-bg);color:var(--amber)}
+.bad{background:var(--red-bg);color:var(--red)}
+/* buildings tab */
+.bld-layout{display:grid;grid-template-columns:255px 1fr;gap:14px}
+.bld-sb{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.bld-sb-h{padding:11px 14px;background:var(--tp-pastel-sand);border-bottom:1px solid var(--border);font-size:10px;font-weight:600;color:var(--tp-dark-slate);text-transform:uppercase;letter-spacing:.5px}
+.bld-item{padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.bld-item:last-child{border-bottom:none}
+.bld-item:hover{background:var(--tp-pastel-sand)}
+.bld-item.act{background:var(--primary-soft);border-left:3px solid var(--tp-dark-slate)}
+.bld-det{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.bld-det-h{padding:15px 18px;border-bottom:1px solid var(--border)}
+.bld-krow{display:flex;border-bottom:1px solid var(--border)}
+.bld-kc{flex:1;padding:13px 16px;border-right:1px solid var(--border)}
+.bld-kc:last-child{border-right:none}
+.bld-kl{font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.bld-kv{font-size:19px;font-weight:600}
+/* modal */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:flex-start;justify-content:center;padding-top:60px;z-index:200}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;width:500px;max-width:96%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.12)}
+.m-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.m-head h3{font-size:15px;font-weight:600;color:var(--tp-dark-slate)}
+.mc{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-secondary);padding:2px 6px;border-radius:4px;line-height:1}
+.mc:hover{background:var(--tp-pastel-sand)}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:9px}
+.fg label{font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px}
+.fg input,.fg select{font-size:13px;padding:7px 9px;border:1px solid var(--border2);border-radius:7px;background:var(--surface);color:var(--text-primary);font-family:var(--font);outline:none;width:100%}
+.fg input:focus,.fg select:focus{border-color:var(--tp-pink)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+.mfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
+.msec{font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px}
+.hint{padding:4px 0 12px;font-size:11px;color:var(--text-tertiary)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--tp-pastel-slate);border-radius:3px}
 </style>
 </head>
 <body>
-
 <div class="topbar">
-  <div class="logo">capacity<span>_</span>simulator</div>
+  <div class="logo">
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+      <rect x="0" y="0" width="7" height="14" fill="white"/>
+      <rect x="0" y="15" width="7" height="7" fill="white"/>
+      <rect x="9" y="0" width="7" height="7" fill="rgba(255,255,255,0.4)"/>
+      <circle cx="19" cy="9" r="7" fill="white"/>
+      <rect x="9" y="10" width="7" height="11" fill="rgba(255,255,255,0.4)"/>
+    </svg>
+    <span class="logo-text">TP <span>Capacity Simulator</span></span>
+  </div>
   <div class="tabs" id="tabs">
+    <button class="tab" onclick="showTab('dashboard')">Dashboard</button>
     <button class="tab on" onclick="showTab('projects')">Projetos</button>
     <button class="tab" onclick="showTab('buildings')">Por edifício</button>
     <button class="tab" onclick="showTab('simulator')">Simulador</button>
   </div>
-  <input class="search-inp" type="search" placeholder="filtrar projeto..." id="search" oninput="render()">
-  <div style="margin-left:auto;display:flex;gap:6px">
-    <button class="btn primary" onclick="openAdd()">+ Projeto</button>
+  <div class="search-wrap">
+    <input class="search-inp" type="search" placeholder="filtrar projeto..." id="search" oninput="render()">
+    <button class="tbtn primary" onclick="openAdd()">+ Projeto</button>
   </div>
 </div>
 
-<div class="strip" id="strip"></div>
-<div id="main"></div>
-<div id="modal"></div>
+<div id="page-dashboard" class="page">
+  <div class="sec-head"><div><h2>Dashboard</h2><p>Visão consolidada da ocupação e alertas</p></div></div>
+  <div class="kpi-grid" id="kpi-grid"></div>
+  <div class="bld-grid" id="bld-grid"></div>
+  <div class="alert-grid" id="alert-grid"></div>
+</div>
+
+<div id="page-projects" class="page active">
+  <div class="sec-head">
+    <div><h2>Projetos</h2><p>Clica em qualquer valor para editar inline</p></div>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);cursor:pointer">
+      <input type="checkbox" id="filt-alloc" onchange="render()" style="accent-color:var(--tp-pink)"> Só com WKS alocados
+    </label>
+  </div>
+  <div class="tw"><div class="tw-s" id="proj-table"></div></div>
+  <div class="hint">Clica em qualquer número para editar · Util.HC = HC/WKS · Util.Peak = Pico Ag./WKS</div>
+</div>
+
+<div id="page-buildings" class="page">
+  <div class="sec-head"><div><h2>Por edifício</h2><p>Seleciona um edifício para ver e editar os projetos alocados</p></div></div>
+  <div class="bld-layout">
+    <div class="bld-sb"><div class="bld-sb-h">Edifícios</div><div id="bld-sb-list"></div></div>
+    <div class="bld-det" id="bld-det"></div>
+  </div>
+</div>
+
+<div id="page-simulator" class="page">
+  <div class="sec-head">
+    <div><h2>Simulador</h2><p>Edita WKS por projeto/edifício — barras atualizam em tempo real</p></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div id="sim-delta"></div>
+      <button class="btn" onclick="resetSim();render()">Repor</button>
+    </div>
+  </div>
+  <div id="sim-wrap" style="overflow:auto"></div>
+  <div class="hint">Clica em qualquer célula para editar</div>
+</div>
+
+<div id="modal-area"></div>
 
 <script>
-const BLD = ['Tejo','Explorer','Oceanário','Oriente Green','Open','Nations','Douro','Covilhã'];
-const CAPS = {Tejo:1142,Explorer:1142,'Oceanário':634,'Oriente Green':249,Open:1656,Nations:916,Douro:496,'Covilhã':204};
+const BLD=['Tejo','Explorer','Oceanário','Oriente Green','Open','Nations','Douro','Covilhã'];
+const CAPS={Tejo:1142,Explorer:1142,'Oceanário':634,'Oriente Green':249,Open:1656,Nations:916,Douro:496,'Covilhã':204};
+</script>
+<script id="data-script">
 
-let DATA = [{"id":"NA","hc":70,"peak_agents":7,"peak_staff":199,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":70,"Covilhã":0}},{"id":"P.ABDC.CSER","hc":27,"peak_agents":41,"peak_staff":18,"seats":{"Tejo":32,"Explorer":32,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.ABFI.CSER","hc":38,"peak_agents":7,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":20,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.ADOB.CSER","hc":144,"peak_agents":58,"peak_staff":16,"seats":{"Tejo":64,"Explorer":64,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.AIGI.INBD","hc":31,"peak_agents":2,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":3,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.AIGI.OBTP","hc":6,"peak_agents":14,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":5,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.AIGI.OUTB","hc":103,"peak_agents":44,"peak_staff":5,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":28,"Open":0,"Nations":0,"Douro":0,"Covilhã":30}},{"id":"P.APPL.CSER","hc":87,"peak_agents":1,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.ARTE.LGES","hc":3,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.ARVA.CSER","hc":12,"peak_agents":10,"peak_staff":5,"seats":{"Tejo":13,"Explorer":13,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.ASCD.CSER","hc":8,"peak_agents":4,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":36,"Covilhã":0}},{"id":"P.AYVS.SALE","hc":1,"peak_agents":0,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BALB.INBD","hc":49,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BANK.INTE","hc":52,"peak_agents":35,"peak_staff":6,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":40,"Nations":0,"Douro":0,"Covilhã":16}},{"id":"P.BBHT.CSER","hc":89,"peak_agents":57,"peak_staff":8,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":104,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BBPI.CSER","hc":142,"peak_agents":17,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":32,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BBPI.SALE","hc":0,"peak_agents":0,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BBVA.BBVA","hc":6,"peak_agents":5,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":16,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BINT.OUTB","hc":92,"peak_agents":48,"peak_staff":6,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":44,"Open":0,"Nations":0,"Douro":36,"Covilhã":0}},{"id":"P.BLIZ.CSER","hc":101,"peak_agents":4,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BLOQ.TECH","hc":14,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BNPP.ARVL","hc":24,"peak_agents":13,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":20,"Covilhã":0}},{"id":"P.BOLT.COMO","hc":1,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BOOK.KING","hc":145,"peak_agents":16,"peak_staff":5,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":34,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BSCI.CSER","hc":16,"peak_agents":8,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":12,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.CGDO.UTBD","hc":25,"peak_agents":36,"peak_staff":4,"seats":{"Tejo":24,"Explorer":24,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.CHEQ.ENER","hc":17,"peak_agents":1,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.CHOI.INBD","hc":1,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.CHUB.AMAZ","hc":5,"peak_agents":4,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.CITI.CSER","hc":57,"peak_agents":27,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":30,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.COFI.COFI","hc":10,"peak_agents":1,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":2,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.CRED.AGRI","hc":75,"peak_agents":35,"peak_staff":4,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":48,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.CRED.MAJO","hc":47,"peak_agents":0,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.DECO.OUTB","hc":37,"peak_agents":13,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":30}},{"id":"P.DESA.OUTB","hc":63,"peak_agents":34,"peak_staff":4,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":96,"Covilhã":38}},{"id":"P.EASY.PARK","hc":1,"peak_agents":1,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":2,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.EDPC.OUTB","hc":62,"peak_agents":30,"peak_staff":4,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":28,"Open":0,"Nations":0,"Douro":0,"Covilhã":30}},{"id":"P.EMEA.EBAY","hc":2,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.EMEA.NIEL","hc":92,"peak_agents":0,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.EMEA.PHIL","hc":15,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.EXPE.INBD","hc":122,"peak_agents":30,"peak_staff":5,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":60,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.FACE.CRTR","hc":485,"peak_agents":168,"peak_staff":24,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":224,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.FACE.CSER","hc":1315,"peak_agents":508,"peak_staff":80,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":662,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.FACE.GPAC","hc":56,"peak_agents":16,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":20,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.FACE.OUTB","hc":30,"peak_agents":13,"peak_staff":13,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.FACE.ROPS","hc":162,"peak_agents":81,"peak_staff":17,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":100,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.FEDX.CSER","hc":11,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.FOOT.INBD","hc":116,"peak_agents":0,"peak_staff":2,"seats":{"Tejo":10,"Explorer":10,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GALP.CSER","hc":0,"peak_agents":0,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.CURA","hc":114,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.CURF","hc":30,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":3,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.DEVV","hc":38,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.DUBL","hc":1,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":2,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.EPPS","hc":8,"peak_agents":6,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":7,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.GECC","hc":129,"peak_agents":0,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":1,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.GPSS","hc":94,"peak_agents":30,"peak_staff":5,"seats":{"Tejo":0,"Explorer":0,"Oceanário":40,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.LEGL","hc":29,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.OUTB","hc":233,"peak_agents":138,"peak_staff":28,"seats":{"Tejo":0,"Explorer":0,"Oceanário":200,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.PACR","hc":213,"peak_agents":1,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.SADS","hc":19,"peak_agents":3,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":4,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.YOUT","hc":27,"peak_agents":18,"peak_staff":9,"seats":{"Tejo":0,"Explorer":0,"Oceanário":29,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.IBER.SALE","hc":1,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.IHGR.CSER","hc":6,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.INSP.CSER","hc":43,"peak_agents":34,"peak_staff":2,"seats":{"Tejo":24,"Explorer":24,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.INSU.CSER","hc":447,"peak_agents":170,"peak_staff":34,"seats":{"Tejo":136,"Explorer":136,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.IZET.CSER","hc":47,"peak_agents":0,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.IZIT.CSER","hc":12,"peak_agents":6,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":20,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.JPMC.CSER","hc":23,"peak_agents":2,"peak_staff":7,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.LDRA.CSER","hc":152,"peak_agents":68,"peak_staff":7,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":66,"Open":0,"Nations":0,"Douro":0,"Covilhã":30}},{"id":"P.LIDL.CSER","hc":23,"peak_agents":1,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":30}},{"id":"P.LORE.CSER","hc":101,"peak_agents":73,"peak_staff":16,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":128,"Covilhã":0}},{"id":"P.LRYM.INBD","hc":15,"peak_agents":8,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":18,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.MARS.CSER","hc":14,"peak_agents":1,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":20,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.MERC.CSER","hc":13,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.MICR.ADSS","hc":0,"peak_agents":0,"peak_staff":4,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.MICR.ASFP","hc":31,"peak_agents":26,"peak_staff":6,"seats":{"Tejo":12,"Explorer":12,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.MICR.CAPS","hc":238,"peak_agents":89,"peak_staff":17,"seats":{"Tejo":56,"Explorer":56,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.MONZ.EURO","hc":22,"peak_agents":26,"peak_staff":6,"seats":{"Tejo":20,"Explorer":20,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NAVE.INBD","hc":23,"peak_agents":0,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NESP.BELU","hc":42,"peak_agents":13,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":30,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NESP.INBD","hc":20,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NEST.RECA","hc":1,"peak_agents":0,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NETF.INBD","hc":21,"peak_agents":0,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NINT.INBD","hc":21,"peak_agents":16,"peak_staff":8,"seats":{"Tejo":24,"Explorer":24,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NOSC.PART","hc":73,"peak_agents":0,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NOSH.ELPD","hc":23,"peak_agents":16,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":32,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NOVA.CSBE","hc":3,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.PEAR.INBD","hc":3,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.PENN.LANE","hc":51,"peak_agents":11,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":6,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.PINT.CSER","hc":117,"peak_agents":0,"peak_staff":5,"seats":{"Tejo":18,"Explorer":18,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.PMOR.INBD","hc":135,"peak_agents":54,"peak_staff":34,"seats":{"Tejo":44,"Explorer":44,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.PVHE.CSER","hc":148,"peak_agents":4,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":4,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.REBE.CSER","hc":2,"peak_agents":0,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.REDI.SALE","hc":180,"peak_agents":258,"peak_staff":55,"seats":{"Tejo":194,"Explorer":194,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.RENA.INBO","hc":20,"peak_agents":4,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.RENA.MAJO","hc":7,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.RENA.TSUP","hc":71,"peak_agents":1,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":2,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.RUBY.CSER","hc":12,"peak_agents":7,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":10,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SALT.BKOF","hc":59,"peak_agents":10,"peak_staff":5,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":17,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SAMS.BKOF","hc":31,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":7,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SANT.COLL","hc":19,"peak_agents":12,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":15,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SANT.SACI","hc":199,"peak_agents":39,"peak_staff":12,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":50,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SCJH.NSON","hc":19,"peak_agents":0,"peak_staff":7,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SGLO.OUTB","hc":21,"peak_agents":4,"peak_staff":4,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":7,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SGLO.SEDE","hc":1,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SONY.PLAY","hc":163,"peak_agents":132,"peak_staff":16,"seats":{"Tejo":0,"Explorer":0,"Oceanário":200,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SUPC.INBD","hc":114,"peak_agents":154,"peak_staff":66,"seats":{"Tejo":90,"Explorer":90,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TAPP.CSER","hc":152,"peak_agents":162,"peak_staff":29,"seats":{"Tejo":140,"Explorer":140,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TEYA.B2BS","hc":4,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":26,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TFBA.COLL","hc":5,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TPNL.BOLC","hc":73,"peak_agents":2,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":1,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TPPT.ATDM","hc":0,"peak_agents":0,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TPUS.MICR","hc":114,"peak_agents":56,"peak_staff":18,"seats":{"Tejo":68,"Explorer":68,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TRRE.CSER","hc":20,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TTOK.ADSO","hc":266,"peak_agents":243,"peak_staff":63,"seats":{"Tejo":156,"Explorer":156,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":74,"Douro":0,"Covilhã":0}},{"id":"P.TTOK.CONT","hc":613,"peak_agents":332,"peak_staff":73,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":480,"Douro":0,"Covilhã":0}},{"id":"P.TTOK.LIVO","hc":347,"peak_agents":166,"peak_staff":55,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":194,"Douro":0,"Covilhã":0}},{"id":"P.TTOK.MIAD","hc":115,"peak_agents":78,"peak_staff":8,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":94,"Douro":0,"Covilhã":0}},{"id":"P.TTOK.SMOP","hc":111,"peak_agents":102,"peak_staff":76,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":74,"Douro":0,"Covilhã":0}},{"id":"P.UNIC.SACI","hc":83,"peak_agents":21,"peak_staff":4,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":48,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.UNIV.COLL","hc":12,"peak_agents":11,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.UNIV.ERSO","hc":59,"peak_agents":28,"peak_staff":7,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":110,"Covilhã":0}},{"id":"P.UPSI.CSER","hc":0,"peak_agents":0,"peak_staff":5,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.VIAP.CSER","hc":54,"peak_agents":2,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.VIPR.SALE","hc":8,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.VODF.PTBR","hc":16,"peak_agents":14,"peak_staff":8,"seats":{"Tejo":17,"Explorer":17,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.VORT.INBD","hc":11,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.VORT.OUTB","hc":2,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.WAHA.LANG","hc":69,"peak_agents":0,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.WISH.ECOM","hc":3,"peak_agents":0,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.WIZI.COLL","hc":63,"peak_agents":10,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":12,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.WIZI.CSER","hc":25,"peak_agents":4,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":12,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.WIZI.SALE","hc":1,"peak_agents":1,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.WIZI.SEDE","hc":4,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.WOKL.TSUP","hc":33,"peak_agents":1,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.YPSO.CSER","hc":78,"peak_agents":34,"peak_staff":15,"seats":{"Tejo":0,"Explorer":0,"Oceanário":136,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}}];
+let DATA = [{"id": "NA", "hc": 70, "peak_agents": 7, "peak_staff": 199, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 70, "Covilhã": 0}}, {"id": "P.ABDC.CSER", "hc": 27, "peak_agents": 41, "peak_staff": 18, "seats": {"Tejo": 32, "Explorer": 32, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.ABFI.CSER", "hc": 38, "peak_agents": 7, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 20, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.ADOB.CSER", "hc": 144, "peak_agents": 58, "peak_staff": 16, "seats": {"Tejo": 64, "Explorer": 64, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.AIGI.INBD", "hc": 31, "peak_agents": 2, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 3, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.AIGI.OBTP", "hc": 6, "peak_agents": 14, "peak_staff": 3, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 5, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.AIGI.OUTB", "hc": 103, "peak_agents": 44, "peak_staff": 5, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 28, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 30}}, {"id": "P.APPL.CSER", "hc": 87, "peak_agents": 1, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.ARTE.LGES", "hc": 3, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.ARVA.CSER", "hc": 12, "peak_agents": 10, "peak_staff": 5, "seats": {"Tejo": 13, "Explorer": 13, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.ASCD.CSER", "hc": 8, "peak_agents": 4, "peak_staff": 2, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 36, "Covilhã": 0}}, {"id": "P.AYVS.SALE", "hc": 1, "peak_agents": 0, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.BALB.INBD", "hc": 49, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.BANK.INTE", "hc": 52, "peak_agents": 35, "peak_staff": 6, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 40, "Nations": 0, "Douro": 0, "Covilhã": 16}}, {"id": "P.BBHT.CSER", "hc": 89, "peak_agents": 57, "peak_staff": 8, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 104, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.BBPI.CSER", "hc": 142, "peak_agents": 17, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 32, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.BBPI.SALE", "hc": 0, "peak_agents": 0, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.BBVA.BBVA", "hc": 6, "peak_agents": 5, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 16, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.BINT.OUTB", "hc": 92, "peak_agents": 48, "peak_staff": 6, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 44, "Open": 0, "Nations": 0, "Douro": 36, "Covilhã": 0}}, {"id": "P.BLIZ.CSER", "hc": 101, "peak_agents": 4, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.BLOQ.TECH", "hc": 14, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.BNPP.ARVL", "hc": 24, "peak_agents": 13, "peak_staff": 2, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 20, "Covilhã": 0}}, {"id": "P.BOLT.COMO", "hc": 1, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.BOOK.KING", "hc": 145, "peak_agents": 16, "peak_staff": 5, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 34, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.BSCI.CSER", "hc": 16, "peak_agents": 8, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 12, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.CGDO.UTBD", "hc": 25, "peak_agents": 36, "peak_staff": 4, "seats": {"Tejo": 24, "Explorer": 24, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.CHEQ.ENER", "hc": 17, "peak_agents": 1, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.CHOI.INBD", "hc": 1, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.CHUB.AMAZ", "hc": 5, "peak_agents": 4, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.CITI.CSER", "hc": 57, "peak_agents": 27, "peak_staff": 2, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 30, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.COFI.COFI", "hc": 10, "peak_agents": 1, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 2, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.CRED.AGRI", "hc": 75, "peak_agents": 35, "peak_staff": 4, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 48, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.CRED.MAJO", "hc": 47, "peak_agents": 0, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.DECO.OUTB", "hc": 37, "peak_agents": 13, "peak_staff": 3, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 30}}, {"id": "P.DESA.OUTB", "hc": 63, "peak_agents": 34, "peak_staff": 4, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 96, "Covilhã": 38}}, {"id": "P.EASY.PARK", "hc": 1, "peak_agents": 1, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 2, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.EDPC.OUTB", "hc": 62, "peak_agents": 30, "peak_staff": 4, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 28, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 30}}, {"id": "P.EMEA.EBAY", "hc": 2, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.EMEA.NIEL", "hc": 92, "peak_agents": 0, "peak_staff": 2, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.EMEA.PHIL", "hc": 15, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.EXPE.INBD", "hc": 122, "peak_agents": 30, "peak_staff": 5, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 60, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.FACE.CRTR", "hc": 485, "peak_agents": 168, "peak_staff": 24, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 224, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.FACE.CSER", "hc": 1315, "peak_agents": 508, "peak_staff": 80, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 662, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.FACE.GPAC", "hc": 56, "peak_agents": 16, "peak_staff": 3, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 20, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.FACE.OUTB", "hc": 30, "peak_agents": 13, "peak_staff": 13, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.FACE.ROPS", "hc": 162, "peak_agents": 81, "peak_staff": 17, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 100, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.FEDX.CSER", "hc": 11, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.FOOT.INBD", "hc": 116, "peak_agents": 0, "peak_staff": 2, "seats": {"Tejo": 10, "Explorer": 10, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.GALP.CSER", "hc": 0, "peak_agents": 0, "peak_staff": 3, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.GOOG.CURA", "hc": 114, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.GOOG.CURF", "hc": 30, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 3, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.GOOG.DEVV", "hc": 38, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.GOOG.DUBL", "hc": 1, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 2, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.GOOG.EPPS", "hc": 8, "peak_agents": 6, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 7, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.GOOG.GECC", "hc": 129, "peak_agents": 0, "peak_staff": 3, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 1, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.GOOG.GPSS", "hc": 94, "peak_agents": 30, "peak_staff": 5, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 40, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.GOOG.LEGL", "hc": 29, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.GOOG.OUTB", "hc": 233, "peak_agents": 138, "peak_staff": 28, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 200, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.GOOG.PACR", "hc": 213, "peak_agents": 1, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.GOOG.SADS", "hc": 19, "peak_agents": 3, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 4, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.GOOG.YOUT", "hc": 27, "peak_agents": 18, "peak_staff": 9, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 29, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.IBER.SALE", "hc": 1, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.IHGR.CSER", "hc": 6, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.INSP.CSER", "hc": 43, "peak_agents": 34, "peak_staff": 2, "seats": {"Tejo": 24, "Explorer": 24, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.INSU.CSER", "hc": 447, "peak_agents": 170, "peak_staff": 34, "seats": {"Tejo": 136, "Explorer": 136, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.IZET.CSER", "hc": 47, "peak_agents": 0, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.IZIT.CSER", "hc": 12, "peak_agents": 6, "peak_staff": 2, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 20, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.JPMC.CSER", "hc": 23, "peak_agents": 2, "peak_staff": 7, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.LDRA.CSER", "hc": 152, "peak_agents": 68, "peak_staff": 7, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 66, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 30}}, {"id": "P.LIDL.CSER", "hc": 23, "peak_agents": 1, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 30}}, {"id": "P.LORE.CSER", "hc": 101, "peak_agents": 73, "peak_staff": 16, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 128, "Covilhã": 0}}, {"id": "P.LRYM.INBD", "hc": 15, "peak_agents": 8, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 18, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.MARS.CSER", "hc": 14, "peak_agents": 1, "peak_staff": 2, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 20, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.MERC.CSER", "hc": 13, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.MICR.ADSS", "hc": 0, "peak_agents": 0, "peak_staff": 4, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.MICR.ASFP", "hc": 31, "peak_agents": 26, "peak_staff": 6, "seats": {"Tejo": 12, "Explorer": 12, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.MICR.CAPS", "hc": 238, "peak_agents": 89, "peak_staff": 17, "seats": {"Tejo": 56, "Explorer": 56, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.MONZ.EURO", "hc": 22, "peak_agents": 26, "peak_staff": 6, "seats": {"Tejo": 20, "Explorer": 20, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.NAVE.INBD", "hc": 23, "peak_agents": 0, "peak_staff": 3, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.NESP.BELU", "hc": 42, "peak_agents": 13, "peak_staff": 2, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 30, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.NESP.INBD", "hc": 20, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.NEST.RECA", "hc": 1, "peak_agents": 0, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.NETF.INBD", "hc": 21, "peak_agents": 0, "peak_staff": 3, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.NINT.INBD", "hc": 21, "peak_agents": 16, "peak_staff": 8, "seats": {"Tejo": 24, "Explorer": 24, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.NOSC.PART", "hc": 73, "peak_agents": 0, "peak_staff": 3, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.NOSH.ELPD", "hc": 23, "peak_agents": 16, "peak_staff": 3, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 32, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.NOVA.CSBE", "hc": 3, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.PEAR.INBD", "hc": 3, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.PENN.LANE", "hc": 51, "peak_agents": 11, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 6, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.PINT.CSER", "hc": 117, "peak_agents": 0, "peak_staff": 5, "seats": {"Tejo": 18, "Explorer": 18, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.PMOR.INBD", "hc": 135, "peak_agents": 54, "peak_staff": 34, "seats": {"Tejo": 44, "Explorer": 44, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.PVHE.CSER", "hc": 148, "peak_agents": 4, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 4, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.REBE.CSER", "hc": 2, "peak_agents": 0, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.REDI.SALE", "hc": 180, "peak_agents": 258, "peak_staff": 55, "seats": {"Tejo": 194, "Explorer": 194, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.RENA.INBO", "hc": 20, "peak_agents": 4, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.RENA.MAJO", "hc": 7, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.RENA.TSUP", "hc": 71, "peak_agents": 1, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 2, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.RUBY.CSER", "hc": 12, "peak_agents": 7, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 10, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.SALT.BKOF", "hc": 59, "peak_agents": 10, "peak_staff": 5, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 17, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.SAMS.BKOF", "hc": 31, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 7, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.SANT.COLL", "hc": 19, "peak_agents": 12, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 15, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.SANT.SACI", "hc": 199, "peak_agents": 39, "peak_staff": 12, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 50, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.SCJH.NSON", "hc": 19, "peak_agents": 0, "peak_staff": 7, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.SGLO.OUTB", "hc": 21, "peak_agents": 4, "peak_staff": 4, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 7, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.SGLO.SEDE", "hc": 1, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.SONY.PLAY", "hc": 163, "peak_agents": 132, "peak_staff": 16, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 200, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.SUPC.INBD", "hc": 114, "peak_agents": 154, "peak_staff": 66, "seats": {"Tejo": 90, "Explorer": 90, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.TAPP.CSER", "hc": 152, "peak_agents": 162, "peak_staff": 29, "seats": {"Tejo": 140, "Explorer": 140, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.TEYA.B2BS", "hc": 4, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 26, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.TFBA.COLL", "hc": 5, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.TPNL.BOLC", "hc": 73, "peak_agents": 2, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 1, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.TPPT.ATDM", "hc": 0, "peak_agents": 0, "peak_staff": 2, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.TPUS.MICR", "hc": 114, "peak_agents": 56, "peak_staff": 18, "seats": {"Tejo": 68, "Explorer": 68, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.TRRE.CSER", "hc": 20, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.TTOK.ADSO", "hc": 266, "peak_agents": 243, "peak_staff": 63, "seats": {"Tejo": 156, "Explorer": 156, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 74, "Douro": 0, "Covilhã": 0}}, {"id": "P.TTOK.CONT", "hc": 613, "peak_agents": 332, "peak_staff": 73, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 480, "Douro": 0, "Covilhã": 0}}, {"id": "P.TTOK.LIVO", "hc": 347, "peak_agents": 166, "peak_staff": 55, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 194, "Douro": 0, "Covilhã": 0}}, {"id": "P.TTOK.MIAD", "hc": 115, "peak_agents": 78, "peak_staff": 8, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 94, "Douro": 0, "Covilhã": 0}}, {"id": "P.TTOK.SMOP", "hc": 111, "peak_agents": 102, "peak_staff": 76, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 74, "Douro": 0, "Covilhã": 0}}, {"id": "P.UNIC.SACI", "hc": 83, "peak_agents": 21, "peak_staff": 4, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 48, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.UNIV.COLL", "hc": 12, "peak_agents": 11, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.UNIV.ERSO", "hc": 59, "peak_agents": 28, "peak_staff": 7, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 110, "Covilhã": 0}}, {"id": "P.UPSI.CSER", "hc": 0, "peak_agents": 0, "peak_staff": 5, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.VIAP.CSER", "hc": 54, "peak_agents": 2, "peak_staff": 2, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.VIPR.SALE", "hc": 8, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.VODF.PTBR", "hc": 16, "peak_agents": 14, "peak_staff": 8, "seats": {"Tejo": 17, "Explorer": 17, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.VORT.INBD", "hc": 11, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.VORT.OUTB", "hc": 2, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.WAHA.LANG", "hc": 69, "peak_agents": 0, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.WISH.ECOM", "hc": 3, "peak_agents": 0, "peak_staff": 3, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.WIZI.COLL", "hc": 63, "peak_agents": 10, "peak_staff": 3, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 12, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.WIZI.CSER", "hc": 25, "peak_agents": 4, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 12, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.WIZI.SALE", "hc": 1, "peak_agents": 1, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.WIZI.SEDE", "hc": 4, "peak_agents": 0, "peak_staff": 0, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.WOKL.TSUP", "hc": 33, "peak_agents": 1, "peak_staff": 1, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 0, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}, {"id": "P.YPSO.CSER", "hc": 78, "peak_agents": 34, "peak_staff": 15, "seats": {"Tejo": 0, "Explorer": 0, "Oceanário": 136, "Oriente Green": 0, "Open": 0, "Nations": 0, "Douro": 0, "Covilhã": 0}}];
+</script>
+<script>
+let simData=JSON.parse(JSON.stringify(DATA));
+let activeTab='projects',editRow=null,editField=null,activeBld=BLD[0];
+const N=v=>Math.max(0,parseInt(v)||0);
+const tot=p=>BLD.reduce((s,b)=>s+(p.seats[b]||0),0);
+const bUsed=(b,src)=>(src||DATA).reduce((s,p)=>s+(p.seats[b]||0),0);
+const sBUsed=b=>simData.reduce((s,p)=>s+(p.seats[b]||0),0);
+const pct=(u,c)=>c?Math.round(u/c*100):0;
+const cc=p=>p>=100?'var(--red)':p>=85?'var(--amber)':'var(--green)';
+const ccls=p=>p>=100?'bad':p>=85?'warn':'ok';
+const filt=()=>{
+  const q=document.getElementById('search').value.toLowerCase();
+  const ao=document.getElementById('filt-alloc')?.checked;
+  return DATA.filter(p=>(!q||p.id.toLowerCase().includes(q))&&(!ao||tot(p)>0));
+};
 
-let tab = 'projects', editRow = null, editField = null;
-
-const n = v => Math.max(0, parseInt(v) || 0);
-const totalSeats = p => BLD.reduce((s, b) => s + (p.seats[b] || 0), 0);
-const bldUsed = b => DATA.reduce((s, p) => s + (p.seats[b] || 0), 0);
-const pct = (u, c) => c ? Math.round(u / c * 100) : 0;
-const colC = p => p >= 95 ? 'var(--red)' : p >= 80 ? 'var(--amber)' : 'var(--green)';
-const colCls = p => p >= 95 ? 'bad' : p >= 80 ? 'warn' : 'ok';
-const filtered = () => { const q = document.getElementById('search').value.toLowerCase(); return DATA.filter(p => p.id.toLowerCase().includes(q)); };
-
-function showTab(t) {
-  tab = t; editRow = null; editField = null;
-  document.querySelectorAll('.tab').forEach((el, i) => el.classList.toggle('on', ['projects','buildings','simulator'][i] === t));
+function showTab(t){
+  activeTab=t;editRow=null;editField=null;
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['dashboard','projects','buildings','simulator'][i]===t));
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+t).classList.add('active');
   render();
 }
 
-function renderStrip() {
-  const totalCap = Object.values(CAPS).reduce((a, b) => a + b, 0);
-  const totalUsed = BLD.reduce((s, b) => s + bldUsed(b), 0);
-  const p = pct(totalUsed, totalCap);
-  document.getElementById('strip').innerHTML = `
-    <div class="sc"><div class="l">Projetos</div><div class="v">${DATA.length}</div><div class="s">${filtered().length} visíveis</div></div>
-    <div class="sc"><div class="l">Headcount</div><div class="v">${DATA.reduce((s,p)=>s+p.hc,0).toLocaleString()}</div><div class="s">HC total</div></div>
-    <div class="sc"><div class="l">Pico agentes</div><div class="v">${DATA.reduce((s,p)=>s+p.peak_agents,0).toLocaleString()}</div><div class="s">simultâneo</div></div>
-    <div class="sc"><div class="l">Pico staff</div><div class="v">${DATA.reduce((s,p)=>s+p.peak_staff,0).toLocaleString()}</div><div class="s">simultâneo</div></div>
-    <div class="sc"><div class="l">Capacidade</div><div class="v">${totalCap.toLocaleString()}</div><div class="s">postos instalados</div></div>
-    <div class="sc"><div class="l">Ocupação global</div><div class="v" style="color:${colC(p)}">${p}%</div><div class="s">${totalUsed.toLocaleString()} / ${totalCap.toLocaleString()}</div></div>
-  `;
-}
+function renderDashboard(){
+  const tc=Object.values(CAPS).reduce((a,b)=>a+b,0);
+  const tu=BLD.reduce((s,b)=>s+bUsed(b),0);
+  const tp2=DATA.reduce((s,p)=>s+p.peak_agents,0);
+  const gp=pct(tu,tc),pp=pct(tp2,tc);
+  document.getElementById('kpi-grid').innerHTML=`
+    <div class="kpi"><div class="lbl">Ocupação global</div><div class="val" style="color:${cc(gp)}">${gp}%</div><div class="sub">${tu.toLocaleString()} / ${tc.toLocaleString()} WKS</div><div class="bar"><div class="bar-f" style="width:${Math.min(gp,100)}%;background:${cc(gp)}"></div></div></div>
+    <div class="kpi pink"><div class="lbl">% Pico / capacidade</div><div class="val" style="color:${cc(pp)}">${pp}%</div><div class="sub">${tp2.toLocaleString()} agentes pico</div><div class="bar"><div class="bar-f" style="width:${Math.min(pp,100)}%;background:var(--tp-pink)"></div></div></div>
+    <div class="kpi green"><div class="lbl">Postos livres (Cap−Pico)</div><div class="val" style="color:var(--green)">${(tc-tp2).toLocaleString()}</div><div class="sub">disponíveis</div></div>
+    <div class="kpi"><div class="lbl">Total projetos</div><div class="val">${DATA.length}</div><div class="sub">${DATA.filter(p=>tot(p)>0).length} com WKS alocados</div></div>
+    <div class="kpi"><div class="lbl">Pico total agentes</div><div class="val" style="color:var(--tp-dark-slate)">${tp2.toLocaleString()}</div><div class="sub">simultâneo</div></div>`;
 
-function ecell(p, field, val) {
-  const isEdit = editRow === p.id && editField === field;
-  if (isEdit) return `<input class="ei" id="ei" type="number" value="${val}" onblur="commit('${p.id}','${field}',this.value)" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){editRow=null;editField=null;render();}">`;
-  return `<span class="ecell${val===0?' dim':''}" onclick="startEdit('${p.id}','${field}')">${val}</span>`;
-}
+  document.getElementById('bld-grid').innerHTML=BLD.map(b=>{
+    const u=bUsed(b),c=CAPS[b],pk=DATA.filter(p=>p.seats[b]>0).reduce((s,p)=>s+p.peak_agents,0);
+    const p2=pct(u,c),fl=c-pk;
+    return`<div class="bld-card">
+      <div class="bld-name">${b}</div><div class="bld-cap">Cap: ${c.toLocaleString()}</div>
+      <div class="bar"><div class="bar-f" style="width:${Math.min(p2,100)}%;background:${cc(p2)}"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px">
+        <div><div style="font-size:17px;font-weight:600;color:${cc(p2)}">${p2}%</div><div style="font-size:11px;color:var(--text-secondary)">${u} WKS usados</div></div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:600;color:${fl<0?'var(--red)':fl<30?'var(--amber)':'var(--green)'}">${fl}</div><div style="font-size:11px;color:var(--text-secondary)">livres</div></div>
+      </div>
+    </div>`;
+  }).join('');
 
-function scell(p, b) {
-  const isEdit = editRow === p.id && editField === 'seat_' + b;
-  const v = p.seats[b] || 0;
-  if (isEdit) return `<input class="ei" id="ei" type="number" value="${v}" onblur="commitSeat('${p.id}','${b}',this.value)" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){editRow=null;editField=null;render();}">`;
-  return `<span class="ecell${v===0?' dim':''}" onclick="startEdit('${p.id}','seat_${b}')">${v || '—'}</span>`;
-}
-
-function startEdit(id, field) { editRow = id; editField = field; render(); setTimeout(() => { const e = document.getElementById('ei'); if (e) { e.focus(); e.select(); } }, 10); }
-function commit(id, field, val) { const p = DATA.find(x => x.id === id); if (p) p[field] = n(val); editRow = null; editField = null; render(); }
-function commitSeat(id, b, val) { const p = DATA.find(x => x.id === id); if (p) p.seats[b] = n(val); editRow = null; editField = null; render(); }
-function removeProject(id) { if (!confirm('Remover projeto ' + id + '?')) return; DATA = DATA.filter(p => p.id !== id); render(); }
-
-function renderProjects() {
-  const rows = filtered();
-  document.getElementById('main').innerHTML = `
-  <div class="tw">
-    <div class="tw-inner">
-    <table>
-      <thead><tr>
-        <th style="min-width:140px;position:sticky;left:0;z-index:3;background:var(--bg2)">Projeto</th>
-        <th style="min-width:58px">HC</th>
-        <th style="min-width:70px">Pico ag.</th>
-        <th style="min-width:70px">Pico staff</th>
-        ${BLD.map(b => `<th style="min-width:70px">${b.length > 9 ? b.slice(0,9)+'…' : b}</th>`).join('')}
-        <th style="min-width:65px">Total WKS</th>
-        <th style="min-width:60px">Util.HC</th>
-        <th style="min-width:60px">Util.ag.</th>
-        <th style="min-width:36px"></th>
-      </tr></thead>
-      <tbody>
-        ${rows.map(p => {
-          const tot = totalSeats(p);
-          const uHC = tot ? Math.round(p.hc / tot * 100) : null;
-          const uAg = tot ? Math.round(p.peak_agents / tot * 100) : null;
-          return `<tr class="${editRow===p.id?'editing':''}">
-            <td style="position:sticky;left:0;background:var(--bg);z-index:1;border-right:1px solid var(--border)"><span class="sid">${p.id}</span></td>
-            <td>${ecell(p,'hc',p.hc)}</td>
-            <td>${ecell(p,'peak_agents',p.peak_agents)}</td>
-            <td>${ecell(p,'peak_staff',p.peak_staff)}</td>
-            ${BLD.map(b => `<td>${scell(p,b)}</td>`).join('')}
-            <td><span style="font-family:var(--mono);font-weight:500">${tot||'—'}</span></td>
-            <td>${uHC!==null?`<span class="badge ${colCls(uHC)}">${uHC}%</span>`:'<span style="color:var(--text3)">—</span>'}</td>
-            <td>${uAg!==null?`<span class="badge ${colCls(uAg)}">${uAg}%</span>`:'<span style="color:var(--text3)">—</span>'}</td>
-            <td><button class="btn danger" style="padding:2px 7px;font-size:11px" onclick="removeProject('${p.id}')">×</button></td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-      <tfoot><tr>
-        <td style="position:sticky;left:0;background:var(--bg2)">Totais</td>
-        <td><span style="font-family:var(--mono)">${DATA.reduce((s,p)=>s+p.hc,0).toLocaleString()}</span></td>
-        <td><span style="font-family:var(--mono)">${DATA.reduce((s,p)=>s+p.peak_agents,0).toLocaleString()}</span></td>
-        <td><span style="font-family:var(--mono)">${DATA.reduce((s,p)=>s+p.peak_staff,0).toLocaleString()}</span></td>
-        ${BLD.map(b => { const u=bldUsed(b); const p=pct(u,CAPS[b]); return `<td><span style="font-family:var(--mono);color:${colC(p)}">${u}<br><span style="font-size:10px;opacity:.7">${p}%</span></span></td>`; }).join('')}
-        <td><span style="font-family:var(--mono)">${DATA.reduce((s,p)=>s+totalSeats(p),0).toLocaleString()}</span></td>
-        <td colspan="3"></td>
-      </tr></tfoot>
-    </table>
+  const o100=DATA.filter(p=>{const t=tot(p);return t>0&&pct(p.peak_agents,t)>=100;}).sort((a,b)=>pct(b.peak_agents,tot(b))-pct(a.peak_agents,tot(a)));
+  const u50=DATA.filter(p=>{const t=tot(p);return t>0&&pct(p.peak_agents,t)<50;}).sort((a,b)=>pct(a.peak_agents,tot(a))-pct(b.peak_agents,tot(b)));
+  document.getElementById('alert-grid').innerHTML=`
+    <div class="abox">
+      <div class="abox-head"><div class="dot" style="background:var(--red)"></div><h3>Projetos ≥ 100% ocupação</h3><span class="cnt" style="background:var(--red-bg);color:var(--red)">${o100.length}</span></div>
+      <div style="max-height:260px;overflow-y:auto">
+        ${o100.length===0?`<div class="aempty">Sem sobrelotação.</div>`:o100.map(p=>{const t=tot(p),u=pct(p.peak_agents,t);return`<div class="arow"><span class="apid">${p.id}</span><span style="color:var(--text-secondary);font-size:11px">${p.peak_agents} ag. / ${t} WKS</span><span class="aval" style="color:var(--red)">${u}%</span></div>`;}).join('')}
+      </div>
     </div>
-  </div>
-  <div class="hint">Clica em qualquer valor para editar inline · Util.HC = HC / WKS · Util.ag. = Pico agentes / WKS</div>`;
-  if (editRow) setTimeout(() => { const e = document.getElementById('ei'); if (e) { e.focus(); e.select(); } }, 10);
-}
-
-function renderBuildings() {
-  document.getElementById('main').innerHTML = `<div class="bld-grid">
-    ${BLD.map(b => {
-      const used = bldUsed(b); const p = pct(used, CAPS[b]); const free = CAPS[b] - used;
-      const projs = DATA.filter(x => x.seats[b] > 0).sort((a, c) => c.seats[b] - a.seats[b]);
-      const peakAg = projs.reduce((s, x) => s + x.peak_agents, 0);
-      const peakSt = projs.reduce((s, x) => s + x.peak_staff, 0);
-      return `<div class="bld-card">
-        <div class="bld-name">${b}</div>
-        <div class="bld-cap">Cap: ${CAPS[b].toLocaleString()} postos</div>
-        <div class="bar"><div class="bf" style="width:${Math.min(p,100)}%;background:${colC(p)}"></div></div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-          <span style="font-size:11px;color:var(--text2)">${used} usados · ${free} livres</span>
-          <span style="font-family:var(--mono);font-size:13px;font-weight:500;color:${colC(p)}">${p}%</span>
-        </div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">${projs.length} projetos · Peak ag: ${peakAg} · Peak staff: ${peakSt}</div>
-        ${projs.slice(0,5).map(x=>`<div class="bld-proj"><span class="pid">${x.id}</span><span style="font-family:var(--mono);font-weight:500">${x.seats[b]}</span></div>`).join('')}
-        ${projs.length>5?`<div style="font-size:11px;color:var(--text3);padding-top:4px;border-top:1px solid var(--border)">+ ${projs.length-5} outros</div>`:''}
-      </div>`;
-    }).join('')}
-  </div>`;
-}
-
-function renderSimulator() {
-  const rows = filtered();
-  document.getElementById('main').innerHTML = `<div style="padding:14px;overflow:auto">
-    <div style="min-width:1000px">
-    <div class="sim-grid-head">
-      <div style="width:155px;min-width:155px;padding:6px 10px;border-right:1px solid var(--border);font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.4px">Projeto</div>
-      <div style="width:60px;min-width:60px;padding:6px 6px;border-right:1px solid var(--border);font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.4px">Peak ag.</div>
-      <div style="width:60px;min-width:60px;padding:6px 6px;border-right:1px solid var(--border);font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.4px">Peak st.</div>
-      ${BLD.map(b => { const used=bldUsed(b); const p=pct(used,CAPS[b]);
-        return `<div class="sim-head-cell">
-          <div style="font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b}</div>
-          <div class="bar"><div class="bf" style="width:${Math.min(p,100)}%;background:${colC(p)}"></div></div>
-          <div style="font-size:10px;color:${colC(p)};font-family:var(--mono)">${used}/${CAPS[b]} · ${p}%</div>
-        </div>`;
-      }).join('')}
-      <div style="width:65px;min-width:65px;padding:6px 8px;font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.4px">Total</div>
-    </div>
-    <div class="sim-body" id="sim-body">
-      ${rows.map(p => {
-        const tot = totalSeats(p);
-        return `<div class="sim-row">
-          <div style="width:155px;min-width:155px;padding:5px 10px;border-right:1px solid var(--border);display:flex;align-items:center"><span class="sid">${p.id}</span></div>
-          <div style="width:60px;min-width:60px;padding:5px 6px;border-right:1px solid var(--border);font-family:var(--mono);font-size:12px;display:flex;align-items:center;color:var(--text2)">${p.peak_agents||'—'}</div>
-          <div style="width:60px;min-width:60px;padding:5px 6px;border-right:1px solid var(--border);font-family:var(--mono);font-size:12px;display:flex;align-items:center;color:var(--text2)">${p.peak_staff||'—'}</div>
-          ${BLD.map(b => {
-            const v = p.seats[b] || 0;
-            const isE = editRow === p.id && editField === 'sim_' + b;
-            return `<div class="sim-cell" onclick="startEdit('${p.id}','sim_${b}')">
-              ${isE ? `<input class="ei" id="ei" type="number" value="${v}" onblur="commitSeat('${p.id}','${b}',this.value)" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){editRow=null;editField=null;render();}">` :
-              v > 0 ? `<div style="font-family:var(--mono);font-size:12px;font-weight:500">${v}</div><div style="font-size:10px;color:var(--text3)">${pct(v,CAPS[b])}% edif.</div>` :
-              `<span style="color:var(--text3);font-size:11px">—</span>`}
-            </div>`;
-          }).join('')}
-          <div style="width:65px;min-width:65px;padding:5px 8px;font-family:var(--mono);font-size:12px;font-weight:500;display:flex;align-items:center">${tot||'—'}</div>
-        </div>`;
-      }).join('')}
-    </div>
-    <div class="sim-footer">
-      <div style="width:155px;min-width:155px;padding:6px 10px;border-right:1px solid var(--border);font-size:11px;font-weight:500;color:var(--text2)">Postos livres</div>
-      <div style="width:60px;min-width:60px;border-right:1px solid var(--border)"></div>
-      <div style="width:60px;min-width:60px;border-right:1px solid var(--border)"></div>
-      ${BLD.map(b => { const f=CAPS[b]-bldUsed(b); return `<div class="sim-footer-cell" style="color:${f<0?'var(--red)':f<30?'var(--amber)':'var(--green)'}">${f}</div>`; }).join('')}
-      <div class="sim-footer-cell">${BLD.reduce((s,b)=>s+CAPS[b]-bldUsed(b),0)}</div>
-    </div>
-    </div>
-  </div>
-  <div class="hint">Clica em qualquer célula de workstations para editar · As barras de ocupação atualizam em tempo real</div>`;
-  if (editRow) setTimeout(() => { const e = document.getElementById('ei'); if (e) { e.focus(); e.select(); } }, 10);
-}
-
-function openAdd() {
-  document.getElementById('modal').innerHTML = `
-    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
-      <div class="modal">
-        <h3>+ novo projeto</h3>
-        <div class="fg"><label>ID do projeto</label><input id="np-id" placeholder="P.XXXX.XXXX" style="font-family:var(--mono)"></div>
-        <div class="g2">
-          <div class="fg"><label>HC</label><input id="np-hc" type="number" value="0" min="0"></div>
-          <div class="fg"><label>Pico agentes</label><input id="np-pa" type="number" value="0" min="0"></div>
-          <div class="fg"><label>Pico staff</label><input id="np-ps" type="number" value="0" min="0"></div>
-        </div>
-        <div style="margin:10px 0 6px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Workstations por edifício</div>
-        <div class="g4">
-          ${BLD.map(b => `<div class="fg"><label>${b}</label><input id="np-${b.replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,'X')}" type="number" value="0" min="0"></div>`).join('')}
-        </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
-          <button class="btn" onclick="closeModal()">Cancelar</button>
-          <button class="btn primary" onclick="addProject()">Adicionar</button>
-        </div>
+    <div class="abox">
+      <div class="abox-head"><div class="dot" style="background:var(--amber)"></div><h3>Projetos &lt; 50% ocupação</h3><span class="cnt" style="background:var(--amber-bg);color:var(--amber)">${u50.length}</span></div>
+      <div style="max-height:260px;overflow-y:auto">
+        ${u50.length===0?`<div class="aempty">Todos acima de 50%.</div>`:u50.map(p=>{const t=tot(p),u=pct(p.peak_agents,t);return`<div class="arow"><span class="apid">${p.id}</span><span style="color:var(--text-secondary);font-size:11px">${p.peak_agents} ag. / ${t} WKS</span><span class="aval" style="color:var(--amber)">${u}%</span></div>`;}).join('')}
       </div>
     </div>`;
 }
 
-function closeModal() { document.getElementById('modal').innerHTML = ''; }
+function ec(p,f,v){
+  const e=editRow===p.id&&editField===f;
+  if(e)return`<input class="ei" id="ei" type="number" value="${v}" onblur="commit('${p.id}','${f}',this.value)" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){editRow=null;editField=null;render();}">`;
+  return`<span class="ec${v===0?' z':''}" onclick="se('${p.id}','${f}')">${v}</span>`;
+}
+function sc(p,b){
+  const f='seat_'+b,e=editRow===p.id&&editField===f,v=p.seats[b]||0;
+  if(e)return`<input class="ei" id="ei" type="number" value="${v}" onblur="cs('${p.id}','${b}',this.value)" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){editRow=null;editField=null;render();}">`;
+  return`<span class="ec${v===0?' z':''}" onclick="se('${p.id}','seat_${b}')">${v||'—'}</span>`;
+}
+function se(id,f){editRow=id;editField=f;render();setTimeout(()=>{const e=document.getElementById('ei');if(e){e.focus();e.select();}},10);}
+function commit(id,f,v){const p=DATA.find(x=>x.id===id);if(p)p[f]=N(v);editRow=null;editField=null;syncSim();render();}
+function cs(id,b,v){const p=DATA.find(x=>x.id===id);if(p)p.seats[b]=N(v);editRow=null;editField=null;syncSim();render();}
+function syncSim(){simData=JSON.parse(JSON.stringify(DATA));}
 
-function addProject() {
-  const id = document.getElementById('np-id').value.trim();
-  if (!id) { alert('ID obrigatório'); return; }
-  if (DATA.find(p => p.id === id)) { alert('ID já existe'); return; }
-  const seats = {};
-  BLD.forEach(b => {
-    const key = 'np-' + b.replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,'X');
-    seats[b] = n(document.getElementById(key)?.value || 0);
-  });
-  DATA.push({ id, hc: n(document.getElementById('np-hc').value), peak_agents: n(document.getElementById('np-pa').value), peak_staff: n(document.getElementById('np-ps').value), seats });
-  closeModal(); render();
+function renderProjects(){
+  const rows=filt();
+  const tHC=DATA.reduce((s,p)=>s+p.hc,0),tPA=DATA.reduce((s,p)=>s+p.peak_agents,0),tPS=DATA.reduce((s,p)=>s+p.peak_staff,0);
+  document.getElementById('proj-table').innerHTML=`
+  <table>
+    <thead><tr>
+      <th style="min-width:130px;position:sticky;left:0;z-index:3">Projeto</th>
+      <th>HC</th><th>Pico ag.</th><th>Pico staff</th>
+      ${BLD.map(b=>`<th style="min-width:65px">${b.length>9?b.slice(0,9)+'…':b}</th>`).join('')}
+      <th>Tot. WKS</th><th>Util.HC</th><th>Util.Peak</th><th></th>
+    </tr></thead>
+    <tbody>${rows.map(p=>{
+      const t=tot(p),uH=t?pct(p.hc,t):null,uP=t?pct(p.peak_agents,t):null;
+      return`<tr class="${editRow===p.id?'ed':''}">
+        <td style="position:sticky;left:0;background:var(--surface);z-index:1;border-right:1px solid var(--border)"><span style="font-family:monospace;font-weight:600;font-size:11px;color:var(--tp-dark-slate)">${p.id}</span></td>
+        <td>${ec(p,'hc',p.hc)}</td><td>${ec(p,'peak_agents',p.peak_agents)}</td><td>${ec(p,'peak_staff',p.peak_staff)}</td>
+        ${BLD.map(b=>`<td>${sc(p,b)}</td>`).join('')}
+        <td><span style="font-family:monospace;font-weight:600">${t||'—'}</span></td>
+        <td>${uH!==null?`<span class="badge ${ccls(uH)}">${uH}%</span>`:'<span style="color:var(--text-tertiary)">—</span>'}</td>
+        <td>${uP!==null?`<span class="badge ${ccls(uP)}">${uP}%</span>`:'<span style="color:var(--text-tertiary)">—</span>'}</td>
+        <td><button class="btn del" onclick="rmProj('${p.id}')">×</button></td>
+      </tr>`;
+    }).join('')}</tbody>
+    <tfoot><tr>
+      <td style="position:sticky;left:0">Totais (${DATA.length})</td>
+      <td>${tHC.toLocaleString()}</td><td>${tPA.toLocaleString()}</td><td>${tPS.toLocaleString()}</td>
+      ${BLD.map(b=>{const u=bUsed(b),p2=pct(u,CAPS[b]);return`<td style="color:${cc(p2)}">${u} <small>(${p2}%)</small></td>`;}).join('')}
+      <td>${DATA.reduce((s,p)=>s+tot(p),0)}</td><td colspan="3"></td>
+    </tr></tfoot>
+  </table>`;
+  if(editRow)setTimeout(()=>{const e=document.getElementById('ei');if(e){e.focus();e.select();}},10);
 }
 
-function render() { renderStrip(); if (tab==='projects') renderProjects(); else if (tab==='buildings') renderBuildings(); else renderSimulator(); }
+function renderBuildings(){
+  document.getElementById('bld-sb-list').innerHTML=BLD.map(b=>{
+    const u=bUsed(b),p2=pct(u,CAPS[b]),n=DATA.filter(x=>x.seats[b]>0).length;
+    return`<div class="bld-item${activeBld===b?' act':''}" onclick="activeBld='${b}';renderBuildings()">
+      <div style="font-size:13px;font-weight:600;color:var(--tp-dark-slate);margin-bottom:2px">${b}</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:5px">${n} projetos · cap ${CAPS[b]}</div>
+      <div class="bar"><div class="bar-f" style="width:${Math.min(p2,100)}%;background:${cc(p2)}"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:2px">
+        <span style="font-size:11px;color:var(--text-secondary)">${u} usados</span>
+        <span style="font-size:11px;font-weight:600;color:${cc(p2)}">${p2}%</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  const b=activeBld,cap=CAPS[b],u=bUsed(b),pk=DATA.filter(p=>p.seats[b]>0).reduce((s,p)=>s+p.peak_agents,0),pks=DATA.filter(p=>p.seats[b]>0).reduce((s,p)=>s+p.peak_staff,0),fl=cap-pk,p2=pct(u,cap);
+  const projs=DATA.filter(p=>p.seats[b]>0).sort((a,c)=>c.seats[b]-a.seats[b]);
+
+  const ecB=(proj,f,v)=>{
+    const e=editRow===proj.id&&editField===f;
+    if(e)return`<input class="ei" id="ei" type="number" value="${v}" style="width:55px" onblur="commitB('${proj.id}','${f}',this.value)" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){editRow=null;editField=null;renderBuildings();}">`;
+    return`<span class="ec${v===0?' z':''}" onclick="seB('${proj.id}','${f}')">${v}</span>`;
+  };
+  const scB=(proj,bid)=>{
+    const f='bseat_'+bid,e=editRow===proj.id&&editField===f,v=proj.seats[bid]||0;
+    if(e)return`<input class="ei" id="ei" type="number" value="${v}" style="width:55px" onblur="csB('${proj.id}','${bid}',this.value)" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){editRow=null;editField=null;renderBuildings();}">`;
+    return`<span class="ec${v===0?' z':''}" onclick="seB('${proj.id}','bseat_${bid}')">${v||'—'}</span>`;
+  };
+
+  document.getElementById('bld-det').innerHTML=`
+    <div class="bld-det-h"><div style="font-size:18px;font-weight:600;color:var(--tp-dark-slate)">${b}</div><div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${projs.length} projetos</div></div>
+    <div class="bld-krow">
+      <div class="bld-kc"><div class="bld-kl">Capacidade</div><div class="bld-kv" style="color:var(--tp-dark-slate)">${cap}</div></div>
+      <div class="bld-kc"><div class="bld-kl">WKS usados</div><div class="bld-kv" style="color:${cc(p2)}">${u} <span style="font-size:13px">(${p2}%)</span></div></div>
+      <div class="bld-kc"><div class="bld-kl">Pico agentes</div><div class="bld-kv" style="color:var(--tp-pink)">${pk}</div></div>
+      <div class="bld-kc"><div class="bld-kl">Pico staff</div><div class="bld-kv" style="color:var(--tp-dark-slate)">${pks}</div></div>
+      <div class="bld-kc"><div class="bld-kl">Postos livres</div><div class="bld-kv" style="color:${fl<0?'var(--red)':fl<30?'var(--amber)':'var(--green)'}">${fl}</div></div>
+    </div>
+    <div style="overflow:auto;max-height:430px">
+    <table>
+      <thead><tr>
+        <th style="position:sticky;left:0;z-index:3;min-width:130px">Projeto</th>
+        <th>HC</th><th>Pico ag.</th><th>Pico staff</th>
+        <th>WKS aqui</th><th>Postos livres</th><th>Util.Peak</th>
+        ${BLD.filter(x=>x!==b).map(x=>`<th style="min-width:60px;font-size:9px">${x.length>7?x.slice(0,7)+'…':x}</th>`).join('')}
+        <th></th>
+      </tr></thead>
+      <tbody>
+        ${projs.length===0?`<tr><td colspan="20" style="padding:24px;text-align:center;color:var(--text-tertiary)">Sem projetos alocados.</td></tr>`:
+        projs.map(proj=>{
+          const wks=proj.seats[b]||0,frl=wks-proj.peak_agents,up=wks?pct(proj.peak_agents,wks):0;
+          return`<tr class="${editRow===proj.id?'ed':''}">
+            <td style="position:sticky;left:0;background:var(--surface);z-index:1;border-right:1px solid var(--border)"><span style="font-family:monospace;font-weight:600;font-size:11px;color:var(--tp-dark-slate)">${proj.id}</span></td>
+            <td>${ecB(proj,'hc',proj.hc)}</td>
+            <td>${ecB(proj,'peak_agents',proj.peak_agents)}</td>
+            <td>${ecB(proj,'peak_staff',proj.peak_staff)}</td>
+            <td>${scB(proj,b)}</td>
+            <td style="font-weight:600;color:${frl<0?'var(--red)':frl<5?'var(--amber)':'var(--green)'}">${frl}</td>
+            <td><span class="badge ${ccls(up)}">${up}%</span></td>
+            ${BLD.filter(x=>x!==b).map(x=>`<td>${scB(proj,x)}</td>`).join('')}
+            <td><button class="btn del" onclick="rmProj('${proj.id}')">×</button></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    </div>
+    <div style="padding:11px 16px;border-top:1px solid var(--border)">
+      <button class="btn save" onclick="openAddToBld('${b}')">+ Adicionar projeto a ${b}</button>
+    </div>`;
+
+  if(editRow)setTimeout(()=>{const e=document.getElementById('ei');if(e){e.focus();e.select();}},10);
+}
+function seB(id,f){editRow=id;editField=f;renderBuildings();setTimeout(()=>{const e=document.getElementById('ei');if(e){e.focus();e.select();}},10);}
+function commitB(id,f,v){const p=DATA.find(x=>x.id===id);if(p)p[f]=N(v);editRow=null;editField=null;syncSim();renderBuildings();}
+function csB(id,b,v){const p=DATA.find(x=>x.id===id);if(p)p.seats[b]=N(v);editRow=null;editField=null;syncSim();renderBuildings();}
+
+function resetSim(){simData=JSON.parse(JSON.stringify(DATA));}
+function gss(pid,b){const s=simData.find(x=>x.id===pid);return s?(s.seats[b]||0):0;}
+function sss(pid,b,v){const s=simData.find(x=>x.id===pid);if(s)s.seats[b]=N(v);}
+
+function renderSimulator(){
+  const rows=filt();
+  const bT=BLD.reduce((s,b)=>s+bUsed(b),0),sT=BLD.reduce((s,b)=>s+sBUsed(b),0),d=sT-bT;
+  document.getElementById('sim-delta').innerHTML=d!==0?`<span style="font-size:12px;padding:5px 12px;border-radius:6px;font-weight:500;background:${d>0?'var(--amber-bg)':'var(--green-bg)'};color:${d>0?'var(--amber)':'var(--green)'}">Delta: ${d>0?'+':''}${d} WKS</span>`:'';
+
+  const hw=`<div style="display:flex;background:var(--tp-pastel-sand);border-radius:10px 10px 0 0;border:1px solid var(--border);border-bottom:none">
+    <div style="width:148px;min-width:148px;padding:8px 10px;border-right:1px solid var(--border);font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px">Projeto</div>
+    <div style="width:55px;min-width:55px;padding:8px 6px;border-right:1px solid var(--border);font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px">Pico ag.</div>
+    ${BLD.map(b=>{const u=sBUsed(b),p2=pct(u,CAPS[b]);return`<div style="flex:1;min-width:88px;padding:5px 8px;border-right:1px solid var(--border)"><div style="font-size:11px;font-weight:600;color:var(--tp-dark-slate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b}</div><div class="bar"><div class="bar-f" style="width:${Math.min(p2,100)}%;background:${cc(p2)}"></div></div><div style="font-size:10px;color:${cc(p2)};font-weight:600">${u}/${CAPS[b]} · ${p2}%</div></div>`;}).join('')}
+    <div style="width:62px;min-width:62px;padding:8px 8px;font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px">Total</div>
+  </div>`;
+
+  const brows=rows.map(p=>{
+    const st=BLD.reduce((s,b)=>s+gss(p.id,b),0);
+    return`<div style="display:flex;border-left:1px solid var(--border);border-right:1px solid var(--border);border-bottom:1px solid var(--border)">
+      <div style="width:148px;min-width:148px;padding:5px 10px;border-right:1px solid var(--border);display:flex;align-items:center"><span style="font-family:monospace;font-weight:600;font-size:11px;color:var(--tp-dark-slate)">${p.id}</span></div>
+      <div style="width:55px;min-width:55px;padding:5px 6px;border-right:1px solid var(--border);font-size:12px;color:var(--text-secondary);display:flex;align-items:center">${p.peak_agents||'—'}</div>
+      ${BLD.map(b=>{
+        const v=gss(p.id,b),base=p.seats[b]||0,diff=v-base,isE=editRow===p.id&&editField==='sim_'+b;
+        return`<div style="flex:1;min-width:88px;padding:4px 7px;border-right:1px solid var(--border);cursor:pointer;transition:background .1s" onmouseenter="this.style.background='rgba(75,76,106,0.04)'" onmouseleave="this.style.background=''" onclick="seS('${p.id}','${b}')">
+          ${isE?`<input class="ei" id="ei" type="number" value="${v}" onblur="csSim('${p.id}','${b}',this.value)" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){editRow=null;editField=null;render();}">`:
+          v>0?`<div style="font-size:12px;font-weight:600;color:var(--tp-dark-slate)">${v}</div><div style="font-size:10px;color:var(--text-secondary)">${pct(v,CAPS[b])}%${diff!==0?` <span style="color:${diff>0?'var(--red)':'var(--green)'}">${diff>0?'+':''}${diff}</span>`:''}</div>`:
+          `<span style="color:var(--text-tertiary);font-size:11px">—</span>`}
+        </div>`;
+      }).join('')}
+      <div style="width:62px;min-width:62px;padding:5px 8px;font-size:12px;font-weight:600;color:var(--tp-dark-slate);display:flex;align-items:center">${st||'—'}</div>
+    </div>`;
+  }).join('');
+
+  const foot=`<div style="display:flex;background:var(--tp-pastel-sand);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px">
+    <div style="width:148px;min-width:148px;padding:7px 10px;border-right:1px solid var(--border);font-size:11px;font-weight:600;color:var(--tp-dark-slate)">Postos livres</div>
+    <div style="width:55px;min-width:55px;border-right:1px solid var(--border)"></div>
+    ${BLD.map(b=>{const f=CAPS[b]-sBUsed(b);return`<div style="flex:1;min-width:88px;padding:7px 8px;border-right:1px solid var(--border);font-size:11px;font-weight:600;color:${f<0?'var(--red)':f<30?'var(--amber)':'var(--green)'}">${f}</div>`;}).join('')}
+    <div style="width:62px;min-width:62px;padding:7px 8px;font-size:11px;font-weight:600;color:var(--tp-dark-slate)">${BLD.reduce((s,b)=>s+CAPS[b]-sBUsed(b),0)}</div>
+  </div>`;
+
+  document.getElementById('sim-wrap').innerHTML=`<div style="min-width:980px">${hw}${brows}${foot}</div>`;
+  if(editRow)setTimeout(()=>{const e=document.getElementById('ei');if(e){e.focus();e.select();}},10);
+}
+function seS(pid,b){editRow=pid;editField='sim_'+b;renderSimulator();setTimeout(()=>{const e=document.getElementById('ei');if(e){e.focus();e.select();}},10);}
+function csSim(pid,b,v){sss(pid,b,N(v));editRow=null;editField=null;renderSimulator();}
+
+function rmProj(id){if(!confirm('Remover '+id+'?'))return;DATA=DATA.filter(p=>p.id!==id);simData=simData.filter(p=>p.id!==id);render();}
+
+function openAdd(){
+  document.getElementById('modal-area').innerHTML=`<div class="mbg" onclick="if(event.target===this)cm()"><div class="modal">
+    <div class="m-head"><h3>Adicionar projeto</h3><button class="mc" onclick="cm()">×</button></div>
+    <div class="fg"><label>ID do projeto</label><input id="np-id" placeholder="P.XXXX.XXXX" style="font-family:monospace"></div>
+    <div class="g3"><div class="fg"><label>HC</label><input id="np-hc" type="number" value="0" min="0"></div><div class="fg"><label>Pico agentes</label><input id="np-pa" type="number" value="0" min="0"></div><div class="fg"><label>Pico staff</label><input id="np-ps" type="number" value="0" min="0"></div></div>
+    <div class="msec">Workstations por edifício</div>
+    <div class="g4">${BLD.map(b=>`<div class="fg"><label>${b}</label><input id="np-${b.replace(/[^a-zA-Z0-9]/g,'_')}" type="number" value="0" min="0"></div>`).join('')}</div>
+    <div class="mfoot">
+      <button onclick="cm()" style="padding:7px 16px;border-radius:7px;border:1px solid var(--border2);background:var(--surface);cursor:pointer;font-family:var(--font);font-size:13px;color:var(--text-secondary)">Cancelar</button>
+      <button onclick="addProj()" style="padding:7px 16px;border-radius:7px;border:none;background:var(--tp-pink);color:#fff;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500">Adicionar</button>
+    </div>
+  </div></div>`;
+}
+
+function openAddToBld(b){
+  document.getElementById('modal-area').innerHTML=`<div class="mbg" onclick="if(event.target===this)cm()"><div class="modal">
+    <div class="m-head"><h3>Adicionar projeto a ${b}</h3><button class="mc" onclick="cm()">×</button></div>
+    <div class="fg"><label>Projeto existente</label><select id="np-ex"><option value="">— novo projeto —</option>${DATA.filter(p=>!(p.seats[b]>0)).map(p=>`<option value="${p.id}">${p.id}</option>`).join('')}</select></div>
+    <div id="npf"><div class="fg"><label>ID (novo)</label><input id="np-id2" placeholder="P.XXXX.XXXX" style="font-family:monospace"></div><div class="g3"><div class="fg"><label>HC</label><input id="np-hc2" type="number" value="0" min="0"></div><div class="fg"><label>Pico ag.</label><input id="np-pa2" type="number" value="0" min="0"></div><div class="fg"><label>Pico staff</label><input id="np-ps2" type="number" value="0" min="0"></div></div></div>
+    <div class="fg"><label>WKS em ${b}</label><input id="np-wks" type="number" value="0" min="0"></div>
+    <div class="mfoot">
+      <button onclick="cm()" style="padding:7px 16px;border-radius:7px;border:1px solid var(--border2);background:var(--surface);cursor:pointer;font-family:var(--font);font-size:13px;color:var(--text-secondary)">Cancelar</button>
+      <button onclick="addToBld('${b}')" style="padding:7px 16px;border-radius:7px;border:none;background:var(--tp-pink);color:#fff;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500">Adicionar</button>
+    </div>
+  </div></div>`;
+  document.getElementById('np-ex').onchange=function(){document.getElementById('npf').style.display=this.value?'none':'block';};
+}
+
+function addToBld(b){
+  const ex=document.getElementById('np-ex').value,wks=N(document.getElementById('np-wks').value);
+  if(ex){const p=DATA.find(x=>x.id===ex);if(p){p.seats[b]=wks;syncSim();cm();render();}}
+  else{
+    const id=document.getElementById('np-id2').value.trim();
+    if(!id){alert('ID obrigatório');return;}
+    if(DATA.find(p=>p.id===id)){alert('ID já existe');return;}
+    const seats={};BLD.forEach(x=>seats[x]=x===b?wks:0);
+    const np={id,hc:N(document.getElementById('np-hc2').value),peak_agents:N(document.getElementById('np-pa2').value),peak_staff:N(document.getElementById('np-ps2').value),seats};
+    DATA.push(np);simData.push(JSON.parse(JSON.stringify(np)));cm();render();
+  }
+}
+
+function addProj(){
+  const id=document.getElementById('np-id').value.trim();
+  if(!id){alert('ID obrigatório');return;}
+  if(DATA.find(p=>p.id===id)){alert('ID já existe');return;}
+  const seats={};BLD.forEach(b=>{seats[b]=N(document.getElementById('np-'+b.replace(/[^a-zA-Z0-9]/g,'_'))?.value||0);});
+  const np={id,hc:N(document.getElementById('np-hc').value),peak_agents:N(document.getElementById('np-pa').value),peak_staff:N(document.getElementById('np-ps').value),seats};
+  DATA.push(np);simData.push(JSON.parse(JSON.stringify(np)));cm();render();
+}
+
+function cm(){document.getElementById('modal-area').innerHTML='';}
+
+function render(){
+  if(activeTab==='dashboard')renderDashboard();
+  else if(activeTab==='projects')renderProjects();
+  else if(activeTab==='buildings')renderBuildings();
+  else renderSimulator();
+}
 render();
 </script>
 </body>
