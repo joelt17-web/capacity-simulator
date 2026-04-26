@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capacity Simulator</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --bg2: #161922;
+  --bg3: #1e2230;
+  --border: #2a2f3e;
+  --border2: #353b4f;
+  --text: #e8eaf0;
+  --text2: #8b90a0;
+  --text3: #555b6e;
+  --accent: #4f8ef7;
+  --accent2: #2563d4;
+  --green: #22c97a;
+  --green-bg: rgba(34,201,122,0.1);
+  --amber: #f59e0b;
+  --amber-bg: rgba(245,158,11,0.1);
+  --red: #ef4444;
+  --red-bg: rgba(239,68,68,0.1);
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 13px; min-height: 100vh; }
+
+/* TOPBAR */
+.topbar {
+  display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+  border-bottom: 1px solid var(--border); background: var(--bg2);
+  position: sticky; top: 0; z-index: 100;
+}
+.logo { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--accent); letter-spacing: -0.3px; white-space: nowrap; }
+.logo span { color: var(--text2); }
+.tabs { display: flex; gap: 2px; background: var(--bg); border-radius: 8px; padding: 3px; flex-shrink: 0; }
+.tab { padding: 5px 14px; border-radius: 6px; border: none; background: transparent; cursor: pointer; font-size: 12px; font-family: var(--sans); color: var(--text2); transition: all .15s; }
+.tab.on { background: var(--bg3); color: var(--text); border: 1px solid var(--border2); }
+.tab:hover:not(.on) { color: var(--text); }
+.search-inp { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-family: var(--sans); font-size: 12px; padding: 5px 10px; width: 140px; outline: none; }
+.search-inp:focus { border-color: var(--accent); }
+.btn { padding: 5px 12px; border-radius: 7px; border: 1px solid var(--border2); background: transparent; cursor: pointer; font-size: 12px; font-family: var(--sans); color: var(--text); transition: all .15s; white-space: nowrap; }
+.btn:hover { background: var(--bg3); border-color: var(--border2); }
+.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn.primary:hover { background: var(--accent2); }
+.btn.danger { background: var(--red-bg); color: var(--red); border-color: rgba(239,68,68,0.3); }
+.btn.danger:hover { background: rgba(239,68,68,0.2); }
+
+/* STRIP */
+.strip { display: grid; grid-template-columns: repeat(6,1fr); border-bottom: 1px solid var(--border); background: var(--bg2); }
+.sc { padding: 10px 14px; border-right: 1px solid var(--border); }
+.sc:last-child { border-right: none; }
+.sc .l { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 3px; }
+.sc .v { font-size: 18px; font-weight: 500; font-family: var(--mono); }
+.sc .s { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+/* TABLE */
+.tw { overflow: auto; border: 1px solid var(--border); border-radius: 10px; margin: 14px 14px 0; }
+.tw-inner { max-height: 540px; overflow: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { text-align: left; padding: 7px 8px; font-size: 10px; font-weight: 500; color: var(--text3); background: var(--bg2); border-bottom: 1px solid var(--border); white-space: nowrap; text-transform: uppercase; letter-spacing: .4px; position: sticky; top: 0; z-index: 2; }
+td { padding: 5px 7px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+tr.editing td { background: rgba(79,142,247,0.04); }
+tfoot td { font-weight: 500; background: var(--bg2); padding: 7px 8px; font-size: 11px; position: sticky; bottom: 0; border-top: 1px solid var(--border); color: var(--text2); }
+
+/* EDITABLE CELL */
+.ecell { cursor: pointer; padding: 3px 5px; border-radius: 5px; display: inline-block; min-width: 36px; transition: background .1s; font-family: var(--mono); }
+.ecell:hover { background: var(--bg3); }
+.ecell.dim { color: var(--text3); }
+.ei { width: 100%; font-size: 12px; border: 1px solid var(--accent); border-radius: 5px; padding: 2px 5px; background: var(--bg); color: var(--text); font-family: var(--mono); min-width: 44px; outline: none; }
+
+/* BADGE */
+.badge { display: inline-flex; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 500; font-family: var(--mono); }
+.ok  { background: var(--green-bg); color: var(--green); }
+.warn{ background: var(--amber-bg); color: var(--amber); }
+.bad { background: var(--red-bg);   color: var(--red);   }
+.inf { background: rgba(79,142,247,0.12); color: var(--accent); }
+
+/* BAR */
+.bar { height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; margin: 3px 0; }
+.bf  { height: 100%; border-radius: 2px; transition: width .3s; }
+
+/* BUILDING CARDS */
+.bld-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; padding: 14px; }
+.bld-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+.bld-name { font-family: var(--mono); font-size: 13px; font-weight: 500; margin-bottom: 2px; color: var(--text); }
+.bld-cap { font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+.bld-proj { display: flex; justify-content: space-between; font-size: 11px; padding: 3px 0; border-top: 1px solid var(--border); }
+.bld-proj .pid { font-family: var(--mono); color: var(--text2); }
+
+/* SIMULATOR */
+.sim-grid-head { display: flex; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px 10px 0 0; }
+.sim-head-cell { flex: 1; min-width: 85px; padding: 6px 8px; border-right: 1px solid var(--border); }
+.sim-head-cell:last-child { border-right: none; }
+.sim-body { border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; overflow: hidden; }
+.sim-row { display: flex; border-bottom: 1px solid var(--border); }
+.sim-row:last-child { border-bottom: none; }
+.sim-cell { flex: 1; min-width: 85px; padding: 5px 8px; border-right: 1px solid var(--border); cursor: pointer; transition: background .1s; }
+.sim-cell:last-child { border-right: none; }
+.sim-cell:hover { background: rgba(79,142,247,0.05); }
+.sim-footer { display: flex; background: var(--bg2); border-top: 1px solid var(--border); }
+.sim-footer-cell { flex: 1; min-width: 85px; padding: 6px 8px; border-right: 1px solid var(--border); font-size: 11px; font-weight: 500; font-family: var(--mono); }
+.sim-footer-cell:last-child { border-right: none; }
+
+/* MODAL */
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: flex-start; justify-content: center; padding-top: 60px; z-index: 200; }
+.modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; padding: 20px; width: 500px; max-width: 96%; max-height: 85vh; overflow-y: auto; }
+.modal h3 { font-size: 14px; font-weight: 500; margin-bottom: 14px; font-family: var(--mono); color: var(--accent); }
+.fg { display: flex; flex-direction: column; gap: 4px; margin-bottom: 9px; }
+.fg label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; }
+.fg input { font-size: 13px; padding: 7px 9px; border: 1px solid var(--border2); border-radius: 7px; background: var(--bg); color: var(--text); font-family: var(--sans); outline: none; }
+.fg input:focus { border-color: var(--accent); }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.g4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+.hint { padding: 6px 14px 10px; font-size: 11px; color: var(--text3); }
+.sid { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">capacity<span>_</span>simulator</div>
+  <div class="tabs" id="tabs">
+    <button class="tab on" onclick="showTab('projects')">Projetos</button>
+    <button class="tab" onclick="showTab('buildings')">Por edifício</button>
+    <button class="tab" onclick="showTab('simulator')">Simulador</button>
+  </div>
+  <input class="search-inp" type="search" placeholder="filtrar projeto..." id="search" oninput="render()">
+  <div style="margin-left:auto;display:flex;gap:6px">
+    <button class="btn primary" onclick="openAdd()">+ Projeto</button>
+  </div>
+</div>
+
+<div class="strip" id="strip"></div>
+<div id="main"></div>
+<div id="modal"></div>
+
+<script>
+const BLD = ['Tejo','Explorer','Oceanário','Oriente Green','Open','Nations','Douro','Covilhã'];
+const CAPS = {Tejo:1142,Explorer:1142,'Oceanário':634,'Oriente Green':249,Open:1656,Nations:916,Douro:496,'Covilhã':204};
+
+let DATA = [{"id":"NA","hc":70,"peak_agents":7,"peak_staff":199,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":70,"Covilhã":0}},{"id":"P.ABDC.CSER","hc":27,"peak_agents":41,"peak_staff":18,"seats":{"Tejo":32,"Explorer":32,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.ABFI.CSER","hc":38,"peak_agents":7,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":20,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.ADOB.CSER","hc":144,"peak_agents":58,"peak_staff":16,"seats":{"Tejo":64,"Explorer":64,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.AIGI.INBD","hc":31,"peak_agents":2,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":3,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.AIGI.OBTP","hc":6,"peak_agents":14,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":5,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.AIGI.OUTB","hc":103,"peak_agents":44,"peak_staff":5,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":28,"Open":0,"Nations":0,"Douro":0,"Covilhã":30}},{"id":"P.APPL.CSER","hc":87,"peak_agents":1,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.ARTE.LGES","hc":3,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.ARVA.CSER","hc":12,"peak_agents":10,"peak_staff":5,"seats":{"Tejo":13,"Explorer":13,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.ASCD.CSER","hc":8,"peak_agents":4,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":36,"Covilhã":0}},{"id":"P.AYVS.SALE","hc":1,"peak_agents":0,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BALB.INBD","hc":49,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BANK.INTE","hc":52,"peak_agents":35,"peak_staff":6,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":40,"Nations":0,"Douro":0,"Covilhã":16}},{"id":"P.BBHT.CSER","hc":89,"peak_agents":57,"peak_staff":8,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":104,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BBPI.CSER","hc":142,"peak_agents":17,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":32,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BBPI.SALE","hc":0,"peak_agents":0,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BBVA.BBVA","hc":6,"peak_agents":5,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":16,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BINT.OUTB","hc":92,"peak_agents":48,"peak_staff":6,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":44,"Open":0,"Nations":0,"Douro":36,"Covilhã":0}},{"id":"P.BLIZ.CSER","hc":101,"peak_agents":4,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BLOQ.TECH","hc":14,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BNPP.ARVL","hc":24,"peak_agents":13,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":20,"Covilhã":0}},{"id":"P.BOLT.COMO","hc":1,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BOOK.KING","hc":145,"peak_agents":16,"peak_staff":5,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":34,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.BSCI.CSER","hc":16,"peak_agents":8,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":12,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.CGDO.UTBD","hc":25,"peak_agents":36,"peak_staff":4,"seats":{"Tejo":24,"Explorer":24,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.CHEQ.ENER","hc":17,"peak_agents":1,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.CHOI.INBD","hc":1,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.CHUB.AMAZ","hc":5,"peak_agents":4,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.CITI.CSER","hc":57,"peak_agents":27,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":30,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.COFI.COFI","hc":10,"peak_agents":1,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":2,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.CRED.AGRI","hc":75,"peak_agents":35,"peak_staff":4,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":48,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.CRED.MAJO","hc":47,"peak_agents":0,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.DECO.OUTB","hc":37,"peak_agents":13,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":30}},{"id":"P.DESA.OUTB","hc":63,"peak_agents":34,"peak_staff":4,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":96,"Covilhã":38}},{"id":"P.EASY.PARK","hc":1,"peak_agents":1,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":2,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.EDPC.OUTB","hc":62,"peak_agents":30,"peak_staff":4,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":28,"Open":0,"Nations":0,"Douro":0,"Covilhã":30}},{"id":"P.EMEA.EBAY","hc":2,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.EMEA.NIEL","hc":92,"peak_agents":0,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.EMEA.PHIL","hc":15,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.EXPE.INBD","hc":122,"peak_agents":30,"peak_staff":5,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":60,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.FACE.CRTR","hc":485,"peak_agents":168,"peak_staff":24,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":224,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.FACE.CSER","hc":1315,"peak_agents":508,"peak_staff":80,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":662,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.FACE.GPAC","hc":56,"peak_agents":16,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":20,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.FACE.OUTB","hc":30,"peak_agents":13,"peak_staff":13,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.FACE.ROPS","hc":162,"peak_agents":81,"peak_staff":17,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":100,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.FEDX.CSER","hc":11,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.FOOT.INBD","hc":116,"peak_agents":0,"peak_staff":2,"seats":{"Tejo":10,"Explorer":10,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GALP.CSER","hc":0,"peak_agents":0,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.CURA","hc":114,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.CURF","hc":30,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":3,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.DEVV","hc":38,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.DUBL","hc":1,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":2,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.EPPS","hc":8,"peak_agents":6,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":7,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.GECC","hc":129,"peak_agents":0,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":1,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.GPSS","hc":94,"peak_agents":30,"peak_staff":5,"seats":{"Tejo":0,"Explorer":0,"Oceanário":40,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.LEGL","hc":29,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.OUTB","hc":233,"peak_agents":138,"peak_staff":28,"seats":{"Tejo":0,"Explorer":0,"Oceanário":200,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.PACR","hc":213,"peak_agents":1,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.SADS","hc":19,"peak_agents":3,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":4,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.GOOG.YOUT","hc":27,"peak_agents":18,"peak_staff":9,"seats":{"Tejo":0,"Explorer":0,"Oceanário":29,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.IBER.SALE","hc":1,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.IHGR.CSER","hc":6,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.INSP.CSER","hc":43,"peak_agents":34,"peak_staff":2,"seats":{"Tejo":24,"Explorer":24,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.INSU.CSER","hc":447,"peak_agents":170,"peak_staff":34,"seats":{"Tejo":136,"Explorer":136,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.IZET.CSER","hc":47,"peak_agents":0,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.IZIT.CSER","hc":12,"peak_agents":6,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":20,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.JPMC.CSER","hc":23,"peak_agents":2,"peak_staff":7,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.LDRA.CSER","hc":152,"peak_agents":68,"peak_staff":7,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":66,"Open":0,"Nations":0,"Douro":0,"Covilhã":30}},{"id":"P.LIDL.CSER","hc":23,"peak_agents":1,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":30}},{"id":"P.LORE.CSER","hc":101,"peak_agents":73,"peak_staff":16,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":128,"Covilhã":0}},{"id":"P.LRYM.INBD","hc":15,"peak_agents":8,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":18,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.MARS.CSER","hc":14,"peak_agents":1,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":20,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.MERC.CSER","hc":13,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.MICR.ADSS","hc":0,"peak_agents":0,"peak_staff":4,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.MICR.ASFP","hc":31,"peak_agents":26,"peak_staff":6,"seats":{"Tejo":12,"Explorer":12,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.MICR.CAPS","hc":238,"peak_agents":89,"peak_staff":17,"seats":{"Tejo":56,"Explorer":56,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.MONZ.EURO","hc":22,"peak_agents":26,"peak_staff":6,"seats":{"Tejo":20,"Explorer":20,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NAVE.INBD","hc":23,"peak_agents":0,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NESP.BELU","hc":42,"peak_agents":13,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":30,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NESP.INBD","hc":20,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NEST.RECA","hc":1,"peak_agents":0,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NETF.INBD","hc":21,"peak_agents":0,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NINT.INBD","hc":21,"peak_agents":16,"peak_staff":8,"seats":{"Tejo":24,"Explorer":24,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NOSC.PART","hc":73,"peak_agents":0,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NOSH.ELPD","hc":23,"peak_agents":16,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":32,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.NOVA.CSBE","hc":3,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.PEAR.INBD","hc":3,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.PENN.LANE","hc":51,"peak_agents":11,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":6,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.PINT.CSER","hc":117,"peak_agents":0,"peak_staff":5,"seats":{"Tejo":18,"Explorer":18,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.PMOR.INBD","hc":135,"peak_agents":54,"peak_staff":34,"seats":{"Tejo":44,"Explorer":44,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.PVHE.CSER","hc":148,"peak_agents":4,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":4,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.REBE.CSER","hc":2,"peak_agents":0,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.REDI.SALE","hc":180,"peak_agents":258,"peak_staff":55,"seats":{"Tejo":194,"Explorer":194,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.RENA.INBO","hc":20,"peak_agents":4,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.RENA.MAJO","hc":7,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.RENA.TSUP","hc":71,"peak_agents":1,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":2,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.RUBY.CSER","hc":12,"peak_agents":7,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":10,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SALT.BKOF","hc":59,"peak_agents":10,"peak_staff":5,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":17,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SAMS.BKOF","hc":31,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":7,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SANT.COLL","hc":19,"peak_agents":12,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":15,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SANT.SACI","hc":199,"peak_agents":39,"peak_staff":12,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":50,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SCJH.NSON","hc":19,"peak_agents":0,"peak_staff":7,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SGLO.OUTB","hc":21,"peak_agents":4,"peak_staff":4,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":7,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SGLO.SEDE","hc":1,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SONY.PLAY","hc":163,"peak_agents":132,"peak_staff":16,"seats":{"Tejo":0,"Explorer":0,"Oceanário":200,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.SUPC.INBD","hc":114,"peak_agents":154,"peak_staff":66,"seats":{"Tejo":90,"Explorer":90,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TAPP.CSER","hc":152,"peak_agents":162,"peak_staff":29,"seats":{"Tejo":140,"Explorer":140,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TEYA.B2BS","hc":4,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":26,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TFBA.COLL","hc":5,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TPNL.BOLC","hc":73,"peak_agents":2,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":1,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TPPT.ATDM","hc":0,"peak_agents":0,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TPUS.MICR","hc":114,"peak_agents":56,"peak_staff":18,"seats":{"Tejo":68,"Explorer":68,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TRRE.CSER","hc":20,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.TTOK.ADSO","hc":266,"peak_agents":243,"peak_staff":63,"seats":{"Tejo":156,"Explorer":156,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":74,"Douro":0,"Covilhã":0}},{"id":"P.TTOK.CONT","hc":613,"peak_agents":332,"peak_staff":73,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":480,"Douro":0,"Covilhã":0}},{"id":"P.TTOK.LIVO","hc":347,"peak_agents":166,"peak_staff":55,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":194,"Douro":0,"Covilhã":0}},{"id":"P.TTOK.MIAD","hc":115,"peak_agents":78,"peak_staff":8,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":94,"Douro":0,"Covilhã":0}},{"id":"P.TTOK.SMOP","hc":111,"peak_agents":102,"peak_staff":76,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":74,"Douro":0,"Covilhã":0}},{"id":"P.UNIC.SACI","hc":83,"peak_agents":21,"peak_staff":4,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":48,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.UNIV.COLL","hc":12,"peak_agents":11,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.UNIV.ERSO","hc":59,"peak_agents":28,"peak_staff":7,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":110,"Covilhã":0}},{"id":"P.UPSI.CSER","hc":0,"peak_agents":0,"peak_staff":5,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.VIAP.CSER","hc":54,"peak_agents":2,"peak_staff":2,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.VIPR.SALE","hc":8,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.VODF.PTBR","hc":16,"peak_agents":14,"peak_staff":8,"seats":{"Tejo":17,"Explorer":17,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.VORT.INBD","hc":11,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.VORT.OUTB","hc":2,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.WAHA.LANG","hc":69,"peak_agents":0,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.WISH.ECOM","hc":3,"peak_agents":0,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.WIZI.COLL","hc":63,"peak_agents":10,"peak_staff":3,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":12,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.WIZI.CSER","hc":25,"peak_agents":4,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":12,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.WIZI.SALE","hc":1,"peak_agents":1,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.WIZI.SEDE","hc":4,"peak_agents":0,"peak_staff":0,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.WOKL.TSUP","hc":33,"peak_agents":1,"peak_staff":1,"seats":{"Tejo":0,"Explorer":0,"Oceanário":0,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}},{"id":"P.YPSO.CSER","hc":78,"peak_agents":34,"peak_staff":15,"seats":{"Tejo":0,"Explorer":0,"Oceanário":136,"Oriente Green":0,"Open":0,"Nations":0,"Douro":0,"Covilhã":0}}];
+
+let tab = 'projects', editRow = null, editField = null;
+
+const n = v => Math.max(0, parseInt(v) || 0);
+const totalSeats = p => BLD.reduce((s, b) => s + (p.seats[b] || 0), 0);
+const bldUsed = b => DATA.reduce((s, p) => s + (p.seats[b] || 0), 0);
+const pct = (u, c) => c ? Math.round(u / c * 100) : 0;
+const colC = p => p >= 95 ? 'var(--red)' : p >= 80 ? 'var(--amber)' : 'var(--green)';
+const colCls = p => p >= 95 ? 'bad' : p >= 80 ? 'warn' : 'ok';
+const filtered = () => { const q = document.getElementById('search').value.toLowerCase(); return DATA.filter(p => p.id.toLowerCase().includes(q)); };
+
+function showTab(t) {
+  tab = t; editRow = null; editField = null;
+  document.querySelectorAll('.tab').forEach((el, i) => el.classList.toggle('on', ['projects','buildings','simulator'][i] === t));
+  render();
+}
+
+function renderStrip() {
+  const totalCap = Object.values(CAPS).reduce((a, b) => a + b, 0);
+  const totalUsed = BLD.reduce((s, b) => s + bldUsed(b), 0);
+  const p = pct(totalUsed, totalCap);
+  document.getElementById('strip').innerHTML = `
+    <div class="sc"><div class="l">Projetos</div><div class="v">${DATA.length}</div><div class="s">${filtered().length} visíveis</div></div>
+    <div class="sc"><div class="l">Headcount</div><div class="v">${DATA.reduce((s,p)=>s+p.hc,0).toLocaleString()}</div><div class="s">HC total</div></div>
+    <div class="sc"><div class="l">Pico agentes</div><div class="v">${DATA.reduce((s,p)=>s+p.peak_agents,0).toLocaleString()}</div><div class="s">simultâneo</div></div>
+    <div class="sc"><div class="l">Pico staff</div><div class="v">${DATA.reduce((s,p)=>s+p.peak_staff,0).toLocaleString()}</div><div class="s">simultâneo</div></div>
+    <div class="sc"><div class="l">Capacidade</div><div class="v">${totalCap.toLocaleString()}</div><div class="s">postos instalados</div></div>
+    <div class="sc"><div class="l">Ocupação global</div><div class="v" style="color:${colC(p)}">${p}%</div><div class="s">${totalUsed.toLocaleString()} / ${totalCap.toLocaleString()}</div></div>
+  `;
+}
+
+function ecell(p, field, val) {
+  const isEdit = editRow === p.id && editField === field;
+  if (isEdit) return `<input class="ei" id="ei" type="number" value="${val}" onblur="commit('${p.id}','${field}',this.value)" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){editRow=null;editField=null;render();}">`;
+  return `<span class="ecell${val===0?' dim':''}" onclick="startEdit('${p.id}','${field}')">${val}</span>`;
+}
+
+function scell(p, b) {
+  const isEdit = editRow === p.id && editField === 'seat_' + b;
+  const v = p.seats[b] || 0;
+  if (isEdit) return `<input class="ei" id="ei" type="number" value="${v}" onblur="commitSeat('${p.id}','${b}',this.value)" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){editRow=null;editField=null;render();}">`;
+  return `<span class="ecell${v===0?' dim':''}" onclick="startEdit('${p.id}','seat_${b}')">${v || '—'}</span>`;
+}
+
+function startEdit(id, field) { editRow = id; editField = field; render(); setTimeout(() => { const e = document.getElementById('ei'); if (e) { e.focus(); e.select(); } }, 10); }
+function commit(id, field, val) { const p = DATA.find(x => x.id === id); if (p) p[field] = n(val); editRow = null; editField = null; render(); }
+function commitSeat(id, b, val) { const p = DATA.find(x => x.id === id); if (p) p.seats[b] = n(val); editRow = null; editField = null; render(); }
+function removeProject(id) { if (!confirm('Remover projeto ' + id + '?')) return; DATA = DATA.filter(p => p.id !== id); render(); }
+
+function renderProjects() {
+  const rows = filtered();
+  document.getElementById('main').innerHTML = `
+  <div class="tw">
+    <div class="tw-inner">
+    <table>
+      <thead><tr>
+        <th style="min-width:140px;position:sticky;left:0;z-index:3;background:var(--bg2)">Projeto</th>
+        <th style="min-width:58px">HC</th>
+        <th style="min-width:70px">Pico ag.</th>
+        <th style="min-width:70px">Pico staff</th>
+        ${BLD.map(b => `<th style="min-width:70px">${b.length > 9 ? b.slice(0,9)+'…' : b}</th>`).join('')}
+        <th style="min-width:65px">Total WKS</th>
+        <th style="min-width:60px">Util.HC</th>
+        <th style="min-width:60px">Util.ag.</th>
+        <th style="min-width:36px"></th>
+      </tr></thead>
+      <tbody>
+        ${rows.map(p => {
+          const tot = totalSeats(p);
+          const uHC = tot ? Math.round(p.hc / tot * 100) : null;
+          const uAg = tot ? Math.round(p.peak_agents / tot * 100) : null;
+          return `<tr class="${editRow===p.id?'editing':''}">
+            <td style="position:sticky;left:0;background:var(--bg);z-index:1;border-right:1px solid var(--border)"><span class="sid">${p.id}</span></td>
+            <td>${ecell(p,'hc',p.hc)}</td>
+            <td>${ecell(p,'peak_agents',p.peak_agents)}</td>
+            <td>${ecell(p,'peak_staff',p.peak_staff)}</td>
+            ${BLD.map(b => `<td>${scell(p,b)}</td>`).join('')}
+            <td><span style="font-family:var(--mono);font-weight:500">${tot||'—'}</span></td>
+            <td>${uHC!==null?`<span class="badge ${colCls(uHC)}">${uHC}%</span>`:'<span style="color:var(--text3)">—</span>'}</td>
+            <td>${uAg!==null?`<span class="badge ${colCls(uAg)}">${uAg}%</span>`:'<span style="color:var(--text3)">—</span>'}</td>
+            <td><button class="btn danger" style="padding:2px 7px;font-size:11px" onclick="removeProject('${p.id}')">×</button></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+      <tfoot><tr>
+        <td style="position:sticky;left:0;background:var(--bg2)">Totais</td>
+        <td><span style="font-family:var(--mono)">${DATA.reduce((s,p)=>s+p.hc,0).toLocaleString()}</span></td>
+        <td><span style="font-family:var(--mono)">${DATA.reduce((s,p)=>s+p.peak_agents,0).toLocaleString()}</span></td>
+        <td><span style="font-family:var(--mono)">${DATA.reduce((s,p)=>s+p.peak_staff,0).toLocaleString()}</span></td>
+        ${BLD.map(b => { const u=bldUsed(b); const p=pct(u,CAPS[b]); return `<td><span style="font-family:var(--mono);color:${colC(p)}">${u}<br><span style="font-size:10px;opacity:.7">${p}%</span></span></td>`; }).join('')}
+        <td><span style="font-family:var(--mono)">${DATA.reduce((s,p)=>s+totalSeats(p),0).toLocaleString()}</span></td>
+        <td colspan="3"></td>
+      </tr></tfoot>
+    </table>
+    </div>
+  </div>
+  <div class="hint">Clica em qualquer valor para editar inline · Util.HC = HC / WKS · Util.ag. = Pico agentes / WKS</div>`;
+  if (editRow) setTimeout(() => { const e = document.getElementById('ei'); if (e) { e.focus(); e.select(); } }, 10);
+}
+
+function renderBuildings() {
+  document.getElementById('main').innerHTML = `<div class="bld-grid">
+    ${BLD.map(b => {
+      const used = bldUsed(b); const p = pct(used, CAPS[b]); const free = CAPS[b] - used;
+      const projs = DATA.filter(x => x.seats[b] > 0).sort((a, c) => c.seats[b] - a.seats[b]);
+      const peakAg = projs.reduce((s, x) => s + x.peak_agents, 0);
+      const peakSt = projs.reduce((s, x) => s + x.peak_staff, 0);
+      return `<div class="bld-card">
+        <div class="bld-name">${b}</div>
+        <div class="bld-cap">Cap: ${CAPS[b].toLocaleString()} postos</div>
+        <div class="bar"><div class="bf" style="width:${Math.min(p,100)}%;background:${colC(p)}"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:11px;color:var(--text2)">${used} usados · ${free} livres</span>
+          <span style="font-family:var(--mono);font-size:13px;font-weight:500;color:${colC(p)}">${p}%</span>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">${projs.length} projetos · Peak ag: ${peakAg} · Peak staff: ${peakSt}</div>
+        ${projs.slice(0,5).map(x=>`<div class="bld-proj"><span class="pid">${x.id}</span><span style="font-family:var(--mono);font-weight:500">${x.seats[b]}</span></div>`).join('')}
+        ${projs.length>5?`<div style="font-size:11px;color:var(--text3);padding-top:4px;border-top:1px solid var(--border)">+ ${projs.length-5} outros</div>`:''}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderSimulator() {
+  const rows = filtered();
+  document.getElementById('main').innerHTML = `<div style="padding:14px;overflow:auto">
+    <div style="min-width:1000px">
+    <div class="sim-grid-head">
+      <div style="width:155px;min-width:155px;padding:6px 10px;border-right:1px solid var(--border);font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.4px">Projeto</div>
+      <div style="width:60px;min-width:60px;padding:6px 6px;border-right:1px solid var(--border);font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.4px">Peak ag.</div>
+      <div style="width:60px;min-width:60px;padding:6px 6px;border-right:1px solid var(--border);font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.4px">Peak st.</div>
+      ${BLD.map(b => { const used=bldUsed(b); const p=pct(used,CAPS[b]);
+        return `<div class="sim-head-cell">
+          <div style="font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b}</div>
+          <div class="bar"><div class="bf" style="width:${Math.min(p,100)}%;background:${colC(p)}"></div></div>
+          <div style="font-size:10px;color:${colC(p)};font-family:var(--mono)">${used}/${CAPS[b]} · ${p}%</div>
+        </div>`;
+      }).join('')}
+      <div style="width:65px;min-width:65px;padding:6px 8px;font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.4px">Total</div>
+    </div>
+    <div class="sim-body" id="sim-body">
+      ${rows.map(p => {
+        const tot = totalSeats(p);
+        return `<div class="sim-row">
+          <div style="width:155px;min-width:155px;padding:5px 10px;border-right:1px solid var(--border);display:flex;align-items:center"><span class="sid">${p.id}</span></div>
+          <div style="width:60px;min-width:60px;padding:5px 6px;border-right:1px solid var(--border);font-family:var(--mono);font-size:12px;display:flex;align-items:center;color:var(--text2)">${p.peak_agents||'—'}</div>
+          <div style="width:60px;min-width:60px;padding:5px 6px;border-right:1px solid var(--border);font-family:var(--mono);font-size:12px;display:flex;align-items:center;color:var(--text2)">${p.peak_staff||'—'}</div>
+          ${BLD.map(b => {
+            const v = p.seats[b] || 0;
+            const isE = editRow === p.id && editField === 'sim_' + b;
+            return `<div class="sim-cell" onclick="startEdit('${p.id}','sim_${b}')">
+              ${isE ? `<input class="ei" id="ei" type="number" value="${v}" onblur="commitSeat('${p.id}','${b}',this.value)" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){editRow=null;editField=null;render();}">` :
+              v > 0 ? `<div style="font-family:var(--mono);font-size:12px;font-weight:500">${v}</div><div style="font-size:10px;color:var(--text3)">${pct(v,CAPS[b])}% edif.</div>` :
+              `<span style="color:var(--text3);font-size:11px">—</span>`}
+            </div>`;
+          }).join('')}
+          <div style="width:65px;min-width:65px;padding:5px 8px;font-family:var(--mono);font-size:12px;font-weight:500;display:flex;align-items:center">${tot||'—'}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="sim-footer">
+      <div style="width:155px;min-width:155px;padding:6px 10px;border-right:1px solid var(--border);font-size:11px;font-weight:500;color:var(--text2)">Postos livres</div>
+      <div style="width:60px;min-width:60px;border-right:1px solid var(--border)"></div>
+      <div style="width:60px;min-width:60px;border-right:1px solid var(--border)"></div>
+      ${BLD.map(b => { const f=CAPS[b]-bldUsed(b); return `<div class="sim-footer-cell" style="color:${f<0?'var(--red)':f<30?'var(--amber)':'var(--green)'}">${f}</div>`; }).join('')}
+      <div class="sim-footer-cell">${BLD.reduce((s,b)=>s+CAPS[b]-bldUsed(b),0)}</div>
+    </div>
+    </div>
+  </div>
+  <div class="hint">Clica em qualquer célula de workstations para editar · As barras de ocupação atualizam em tempo real</div>`;
+  if (editRow) setTimeout(() => { const e = document.getElementById('ei'); if (e) { e.focus(); e.select(); } }, 10);
+}
+
+function openAdd() {
+  document.getElementById('modal').innerHTML = `
+    <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>+ novo projeto</h3>
+        <div class="fg"><label>ID do projeto</label><input id="np-id" placeholder="P.XXXX.XXXX" style="font-family:var(--mono)"></div>
+        <div class="g2">
+          <div class="fg"><label>HC</label><input id="np-hc" type="number" value="0" min="0"></div>
+          <div class="fg"><label>Pico agentes</label><input id="np-pa" type="number" value="0" min="0"></div>
+          <div class="fg"><label>Pico staff</label><input id="np-ps" type="number" value="0" min="0"></div>
+        </div>
+        <div style="margin:10px 0 6px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Workstations por edifício</div>
+        <div class="g4">
+          ${BLD.map(b => `<div class="fg"><label>${b}</label><input id="np-${b.replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,'X')}" type="number" value="0" min="0"></div>`).join('')}
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+          <button class="btn" onclick="closeModal()">Cancelar</button>
+          <button class="btn primary" onclick="addProject()">Adicionar</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function closeModal() { document.getElementById('modal').innerHTML = ''; }
+
+function addProject() {
+  const id = document.getElementById('np-id').value.trim();
+  if (!id) { alert('ID obrigatório'); return; }
+  if (DATA.find(p => p.id === id)) { alert('ID já existe'); return; }
+  const seats = {};
+  BLD.forEach(b => {
+    const key = 'np-' + b.replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,'X');
+    seats[b] = n(document.getElementById(key)?.value || 0);
+  });
+  DATA.push({ id, hc: n(document.getElementById('np-hc').value), peak_agents: n(document.getElementById('np-pa').value), peak_staff: n(document.getElementById('np-ps').value), seats });
+  closeModal(); render();
+}
+
+function render() { renderStrip(); if (tab==='projects') renderProjects(); else if (tab==='buildings') renderBuildings(); else renderSimulator(); }
+render();
+</script>
+</body>
+</html>
